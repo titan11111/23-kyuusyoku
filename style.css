@@ -258,6 +258,25 @@ body {
   background: #FFECB3; /* 薄い黄色 */
   color: #FF8F00; /* オレンジ */
   border: 2px solid #FFC107; /* オレンジのボーダー */
+  animation: pop 0.5s ease;
+}
+
+.reaction-message.neutral {
+  background: #E0E0E0;
+  color: #424242;
+  border: 2px solid #9E9E9E;
+}
+
+.reaction-message.worst {
+  background: #F8BBD0;
+  color: #880E4F;
+  border: 2px solid #AD1457;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 /* 結果画面 */

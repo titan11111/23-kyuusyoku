@@ -1,14 +1,14 @@
-// 4年2組の生徒データ
+// 4年2組の生徒データ（faceは joy / smile / calm / sad / angry の5段階）
 const students = [
-  { name: "タケダ タケシ", gender: "男", likes: "カレーライス", dislikes: "ピーマン炒め", comment: "おかわりしてもいいっすか？", face: "joy" },
+  { name: "タケダ タケシ", gender: "男", likes: "カレーライス", dislikes: "ピーマン炒め", comment: "おかわりしてもいいっすか？", face: "smile" },
   { name: "サトウ ミホ", gender: "女", likes: "ミルメーク牛乳", dislikes: "焼き魚", comment: "甘いのだけなら食べてもいいよ", face: "calm" },
   { name: "オオハシ シュン", gender: "男", likes: "冷凍みかん", dislikes: "牛乳", comment: "みかんがあるときは神だよな", face: "joy" },
   { name: "ナカジマ アキラ", gender: "男", likes: "ソフト麺ミートソース", dislikes: "酢の物", comment: "すっぱいのはちょっと……", face: "calm" },
   { name: "ヤマモト カナ", gender: "女", likes: "揚げパン", dislikes: "ひじきの煮物", comment: "手ベタベタだけど最高〜！", face: "joy" },
   { name: "フジイ マサト", gender: "男", likes: "牛乳", dislikes: "ゼリー", comment: "ゼリーはな、ぷるぷるしてて苦手", face: "calm" },
-  { name: "トミナガ ハルカ", gender: "女", likes: "きなこパン", dislikes: "カレーライス", comment: "辛いのはちょっとだけでいいの……", face: "joy" },
+  { name: "トミナガ ハルカ", gender: "女", likes: "きなこパン", dislikes: "カレーライス", comment: "辛いのはちょっとだけでいいの……", face: "smile" },
   { name: "クドウ ショウタ", gender: "男", likes: "ハムカツ", dislikes: "ミルク寒天", comment: "甘いの、男子はあんま食べんやろ", face: "joy" },
-  { name: "イシイ エミ", gender: "女", likes: "ミルク寒天", dislikes: "野菜の煮付け", comment: "デザートって心のくすりよね", face: "joy" },
+  { name: "イシイ エミ", gender: "女", likes: "ミルク寒天", dislikes: "野菜の煮付け", comment: "デザートって心のくすりよね", face: "smile" },
   { name: "ナガオカ タダシ", gender: "男", likes: "さばの味噌煮", dislikes: "コッペパン", comment: "パンより米がいいなぁ……", face: "calm" },
   { name: "ミヤザワ ユキ", gender: "女", likes: "サラダスパゲティ", dislikes: "牛乳", comment: "牛乳って、ちょっとお腹いたくなるの", face: "calm" },
   { name: "ホソカワ ヒロミ", gender: "女", likes: "コッペパン", dislikes: "わかめスープ", comment: "あの黒いの、海藻？ムリかも……", face: "sad" },
@@ -16,21 +16,21 @@ const students = [
   { name: "ハセガワ レイ", gender: "女", likes: "フルーツポンチ", dislikes: "野菜炒め", comment: "フルーツにシロップ、最強", face: "joy" },
   { name: "タカハシ ジロウ", gender: "男", likes: "カツカレー", dislikes: "サラダ", comment: "葉っぱより肉！", face: "joy" },
   { name: "イノウエ ミユキ", gender: "女", likes: "たまごスープ", dislikes: "焼き魚", comment: "骨、うまく取れないのよねぇ", face: "calm" },
-  { name: "サエキ ケンジ", gender: "男", likes: "牛乳プリン", dislikes: "酢の物", comment: "すっぱいのは、なー……", face: "sad" },
-  { name: "ヨシダ サクラ", gender: "女", likes: "おでん", dislikes: "焼きそば", comment: "おでんって味しみてて落ち着くの", face: "joy" },
+  { name: "サエキ ケンジ", gender: "男", likes: "牛乳プリン", dislikes: "酢の物", comment: "すっぱいのは、なー……", face: "angry" },
+  { name: "ヨシダ サクラ", gender: "女", likes: "おでん", dislikes: "焼きそば", comment: "おでんって味しみてて落ち着くの", face: "smile" },
   { name: "ヤマダ コウスケ", gender: "男", likes: "中華丼", dislikes: "冷凍みかん", comment: "歯にしみるんだよ……あれ", face: "sad" },
   { name: "ナガタ ユリ", gender: "女", likes: "白ごはん", dislikes: "カレー", comment: "カレーはにおいがキツいのよ……", face: "calm" },
-  { name: "カネコ ケンタ", gender: "男", likes: "シチュー", dislikes: "パイナップル", comment: "すっぱい果物が入ってるとイヤ", face: "sad" },
+  { name: "カネコ ケンタ", gender: "男", likes: "シチュー", dislikes: "パイナップル", comment: "すっぱい果物が入ってるとイヤ", face: "angry" },
   { name: "ウエハラ ノゾミ", gender: "女", likes: "スパゲティナポリタン", dislikes: "さばの味噌煮", comment: "魚はちょっとだけなら…", face: "calm" },
   { name: "モリ カズオ", gender: "男", likes: "焼きうどん", dislikes: "ひじき", comment: "ひじきってなんで黒いんや？", face: "calm" },
-  { name: "タニグチ マリ", gender: "女", likes: "チキンライス", dislikes: "野菜スープ", comment: "汁ものって、ちょっとにしてほしい", face: "joy" },
+  { name: "タニグチ マリ", gender: "女", likes: "チキンライス", dislikes: "野菜スープ", comment: "汁ものって、ちょっとにしてほしい", face: "smile" },
   { name: "ハマダ トモヒコ", gender: "男", likes: "フライドチキン", dislikes: "牛乳寒天", comment: "甘いのよりしょっぱい方がええ", face: "joy" },
   { name: "シバタ アユミ", gender: "女", likes: "コーンスープ", dislikes: "焼きなす", comment: "なすって見た目がこわいのよ……", face: "sad" },
-  { name: "クラモト マサル", gender: "男", likes: "チャーハン", dislikes: "豆腐", comment: "ぷるんってしたやつ苦手や", face: "sad" },
+  { name: "クラモト マサル", gender: "男", likes: "チャーハン", dislikes: "豆腐", comment: "ぷるんってしたやつ苦手や", face: "angry" },
   { name: "アンドウ リナ", gender: "女", likes: "フルーツヨーグルト", dislikes: "カボチャの煮物", comment: "甘いのと甘いのは違うのよね〜", face: "joy" },
   { name: "カワサキ ヒカル", gender: "男", likes: "カレーうどん", dislikes: "こんにゃく", comment: "なんかビヨンってのが気持ち悪い", face: "sad" },
   { name: "オクダ サチオ", gender: "男", likes: "ごはんとたくあん", dislikes: "ミネストローネ", comment: "なんか、洋風すぎるの苦手やわ", face: "calm" },
-  { name: "ノナカ ミキ", gender: "女", likes: "ハンバーグ", dislikes: "トマト", comment: "赤いの、生じゃムリ……", face: "sad" },
+  { name: "ノナカ ミキ", gender: "女", likes: "ハンバーグ", dislikes: "トマト", comment: "赤いの、生じゃムリ……", face: "angry" },
   { name: "ツジモト リク", gender: "男", likes: "冷やし中華", dislikes: "しらたき", comment: "麺はいいけど、糸みたいのはやめてくれ", face: "sad" }
 ];
 
@@ -193,8 +193,9 @@ function nextStudent() {
   gameState.usedStudents.push(randomIndex); // 使用済み生徒として追加
 
   // 生徒情報の表示を更新
+  const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
   currentStudentElement.innerHTML = `
-      <div class="student-face"><img src="img/${gameState.currentStudent.face}.svg" alt="${gameState.currentStudent.face}"></div>
+      <div class="student-face"><img src="img/${genderPrefix}_${gameState.currentStudent.face}.svg" alt="${gameState.currentStudent.face}"></div>
       <div class="student-name">${gameState.currentStudent.name}</div>
       <div class="student-comment">「${gameState.currentStudent.comment}」</div>
       <div class="student-preferences">
@@ -219,45 +220,32 @@ function selectMenu(selectedMenu) {
     const studentLikes = gameState.currentStudent.likes;
     const studentDislikes = gameState.currentStudent.dislikes;
 
-    // 1. 完全一致 (好きな給食)
     if (selectedMenu === studentLikes) {
-        gameState.score += 100; // 正解で100点
+        gameState.score += 100; // 好きな給食で大喜び
         gameState.correctAnswers++;
         reactionText = `「${selectedMenu}！やったー！ありがとう！」`;
         reactionClass = 'good';
         reactionFace = 'joy';
-    }
-    // 2. 完全一致 (嫌いな給食)
-    else if (selectedMenu === studentDislikes) {
-        gameState.score -= 50; // 不正解で50点減点
+    } else if (selectedMenu === studentDislikes) {
+        gameState.score -= 50; // 嫌いな給食は大幅減点
         gameState.wrongAnswers++;
         reactionText = `「えー…${selectedMenu}は苦手なんだよねぇ…」`;
-        reactionClass = 'bad';
-        reactionFace = 'sad';
-    }
-    // 3. 類似食品 (好きな給食の類似品)
-    else {
-        // 生徒の好きな給食が similarFoods のキーに存在し、
-        // 選択したメニューがその類似品リストに含まれているかチェック
+        reactionClass = 'worst';
+        reactionFace = 'angry';
+    } else {
         const likedFoodSimilarities = similarFoods[studentLikes] || [];
-
-        // 嫌いな給食の類似品チェック
         const dislikedFoodSimilarities = similarFoods[studentDislikes] || [];
-
-        let handled = false; // すでにリアクションが決まったかどうかのフラグ
+        let handled = false;
 
         if (likedFoodSimilarities.includes(selectedMenu)) {
-            gameState.score += 30; // 類似品で30点加点 (調整可能)
-            gameState.correctAnswers++; // 類似品も正解としてカウント
+            gameState.score += 30; // 類似品は少し喜ぶ
+            gameState.correctAnswers++;
             reactionText = `「おっ！${selectedMenu}！${studentLikes}に似てる！ありがとう！」`;
-            reactionClass = 'medium'; // 新しいリアクションクラス
-            reactionFace = 'joy';
+            reactionClass = 'medium';
+            reactionFace = 'smile';
             handled = true;
-        }
-        // 嫌いな給食の類似品だった場合（好きな給食の類似品ではない場合のみチェック）
-        else if (dislikedFoodSimilarities.includes(selectedMenu) && !handled) {
-             // 嫌いなものに似たものを出した場合のペナルティ（調整可能）
-            gameState.score -= 30;
+        } else if (dislikedFoodSimilarities.includes(selectedMenu)) {
+            gameState.score -= 30; // 嫌いなものに近くて残念
             gameState.wrongAnswers++;
             reactionText = `「うわっ、${selectedMenu}かあ…${studentDislikes}に似てるからちょっと…」`;
             reactionClass = 'bad';
@@ -265,31 +253,30 @@ function selectMenu(selectedMenu) {
             handled = true;
         }
 
-        // 5. どちらでもない (普通の不正解)
         if (!handled) {
-            gameState.score -= 20; // どちらでもない場合は20点減点
+            gameState.score -= 20; // どちらでもない場合
             gameState.wrongAnswers++;
             reactionText = `「うーん、これは今日じゃない気分かな…」`;
-            reactionClass = 'bad';
+            reactionClass = 'neutral';
             reactionFace = 'calm';
         }
     }
 
-    gameState.served++; // 対応した生徒の数を増やす
-    updateUI(); // UIを更新
+    gameState.served++;
+    updateUI();
 
     reactionMessageElement.textContent = reactionText;
-    reactionMessageElement.className = 'reaction-message'; // スタイルをリセットしてから追加
+    reactionMessageElement.className = 'reaction-message';
     reactionMessageElement.classList.add(reactionClass);
     const faceImg = document.createElement('img');
-    faceImg.src = `img/${reactionFace}.svg`;
+    const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
+    faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
     faceImg.alt = reactionFace;
     reactionMessageElement.appendChild(faceImg);
 
-    // 短時間リアクションを表示した後、次の生徒へ
     setTimeout(() => {
         nextStudent();
-    }, 1000); // 1秒後に次の生徒を表示
+    }, 1000);
 }
 
 
