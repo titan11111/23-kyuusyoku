@@ -136,8 +136,11 @@ body {
 }
 
 .student-face {
-  font-size: 4em;
   margin-bottom: 15px;
+}
+.student-face img {
+  width: 4em;
+  height: 4em;
 }
 
 .student-name {
@@ -230,6 +233,12 @@ body {
   border-radius: 25px;
   display: inline-block;
   transition: all 0.5s ease;
+}
+.reaction-message img {
+  width: 1.5em;
+  height: 1.5em;
+  vertical-align: middle;
+  margin-left: 8px;
 }
 
 .reaction-message.good {
@@ -341,8 +350,9 @@ body {
       padding: 15px;
   }
   
-  .student-face {
-      font-size: 3em;
+  .student-face img {
+      width: 3em;
+      height: 3em;
   }
   
   .student-name {
@@ -382,8 +392,9 @@ body {
       padding: 15px;
   }
   
-  .student-face {
-      font-size: 2.5em;
+  .student-face img {
+      width: 2.5em;
+      height: 2.5em;
   }
   
   .student-name {
