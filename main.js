@@ -220,6 +220,8 @@ function selectMenu(selectedMenu) {
     const studentLikes = gameState.currentStudent.likes;
     const studentDislikes = gameState.currentStudent.dislikes;
 
+    const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
+
     if (selectedMenu === studentLikes) {
         gameState.score += 100; // 好きな給食で大喜び
         gameState.correctAnswers++;
@@ -235,25 +237,32 @@ function selectMenu(selectedMenu) {
     } else {
         const likedFoodSimilarities = similarFoods[studentLikes] || [];
         const dislikedFoodSimilarities = similarFoods[studentDislikes] || [];
-        let handled = false;
 
-        if (likedFoodSimilarities.includes(selectedMenu)) {
+        // 類似判定は片方向の定義しかない場合もあるので、逆方向も確認
+        const isSimilarToLike = () => {
+            if (likedFoodSimilarities.includes(selectedMenu)) return true;
+            // 逆方向チェック
+            return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentLikes));
+        };
+
+        const isSimilarToDislike = () => {
+            if (dislikedFoodSimilarities.includes(selectedMenu)) return true;
+            return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentDislikes));
+        };
+
+        if (isSimilarToLike()) {
             gameState.score += 30; // 類似品は少し喜ぶ
             gameState.correctAnswers++;
             reactionText = `「おっ！${selectedMenu}！${studentLikes}に似てる！ありがとう！」`;
             reactionClass = 'medium';
             reactionFace = 'smile';
-            handled = true;
-        } else if (dislikedFoodSimilarities.includes(selectedMenu)) {
+        } else if (isSimilarToDislike()) {
             gameState.score -= 30; // 嫌いなものに近くて残念
             gameState.wrongAnswers++;
             reactionText = `「うわっ、${selectedMenu}かあ…${studentDislikes}に似てるからちょっと…」`;
             reactionClass = 'bad';
             reactionFace = 'sad';
-            handled = true;
-        }
-
-        if (!handled) {
+        } else {
             gameState.score -= 20; // どちらでもない場合
             gameState.wrongAnswers++;
             reactionText = `「うーん、これは今日じゃない気分かな…」`;
@@ -269,10 +278,16 @@ function selectMenu(selectedMenu) {
     reactionMessageElement.className = 'reaction-message';
     reactionMessageElement.classList.add(reactionClass);
     const faceImg = document.createElement('img');
-    const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
     faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
     faceImg.alt = reactionFace;
     reactionMessageElement.appendChild(faceImg);
+
+    // 生徒カードの表情も更新
+    const studentFaceImg = currentStudentElement.querySelector('.student-face img');
+    if (studentFaceImg) {
+        studentFaceImg.src = faceImg.src;
+        studentFaceImg.alt = reactionFace;
+    }
 
     setTimeout(() => {
         nextStudent();
