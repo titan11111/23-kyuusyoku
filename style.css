@@ -31,7 +31,7 @@ body {
 /* 画面管理 */
 .screen {
   padding: 20px;
-  min-height: 500px;
+  /* 画面全体の高さに依存させるため min-height を削除 */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -84,6 +84,10 @@ body {
   padding: 15px;
   align-items: stretch;
   justify-content: flex-start;
+  /* スマホでスクロールせずにコメントを見られるように調整 */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .game-header {
@@ -118,6 +122,9 @@ body {
   margin-bottom: 20px;
   flex-wrap: wrap;
   justify-content: center; /* 中央寄せ */
+  /* 画面内に収めるため高さを調整し内部スクロールを許可 */
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 .student-area {
@@ -341,6 +348,7 @@ body {
   .game-header {
       flex-direction: column;
       gap: 15px;
+      margin-bottom: 10px;
   }
   
   .score-info {
@@ -358,6 +366,7 @@ body {
   .game-main {
       flex-direction: column;
       gap: 15px;
+      margin-bottom: 10px;
   }
   
   .student-area {
@@ -390,6 +399,10 @@ body {
   .menu-button {
       padding: 10px 6px;
       font-size: 0.8em;
+  }
+
+  .reaction-area {
+      min-height: 50px;
   }
   
   .result-stats {
@@ -431,5 +444,9 @@ body {
   .big-button {
       padding: 12px 25px;
       font-size: 1.1em;
+  }
+
+  .reaction-area {
+      min-height: 40px;
   }
 }
