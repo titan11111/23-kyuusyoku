@@ -369,7 +369,8 @@ body {
       margin-bottom: 10px;
   }
   
-  .student-area {
+  .student-area,
+  .menu-selection {
       min-width: auto;
       max-width: 100%; /* スマホでは全幅に */
   }
