@@ -107,6 +107,7 @@ const servedElement = document.getElementById('served');
 const currentStudentElement = document.getElementById('current-student');
 const menuButtonsElement = document.getElementById('menu-buttons');
 const reactionMessageElement = document.getElementById('reaction-message');
+const commentPopup = document.getElementById('comment-popup');
 
 // 結果画面要素
 const finalScoreElement = document.getElementById('final-score');
@@ -197,7 +198,6 @@ function nextStudent() {
   currentStudentElement.innerHTML = `
       <div class="student-face"><img src="img/${genderPrefix}_${gameState.currentStudent.face}.svg" alt="${gameState.currentStudent.face}"></div>
       <div class="student-name">${gameState.currentStudent.name}</div>
-      <div class="student-comment">「${gameState.currentStudent.comment}」</div>
       <div class="student-preferences">
           <div class="likes">好き：${gameState.currentStudent.likes}</div>
           <div class="dislikes">嫌い：${gameState.currentStudent.dislikes}</div>
@@ -207,6 +207,27 @@ function nextStudent() {
   // リアクションメッセージをクリア
   reactionMessageElement.textContent = '';
   reactionMessageElement.className = 'reaction-message'; // スタイルもリセット
+}
+
+// コメントポップアップ表示
+function showCommentPopup(text, faceSrc, reactionClass) {
+    reactionMessageElement.textContent = text;
+    reactionMessageElement.className = 'reaction-message';
+    if (reactionClass) reactionMessageElement.classList.add(reactionClass);
+    if (faceSrc) {
+        const img = document.createElement('img');
+        img.src = faceSrc;
+        img.alt = '';
+        reactionMessageElement.appendChild(img);
+    }
+    commentPopup.classList.remove('hidden');
+    setTimeout(() => {
+        commentPopup.classList.add('hidden');
+        reactionMessageElement.textContent = '';
+        if (gameState.isGameRunning) {
+            nextStudent();
+        }
+    }, 1000);
 }
 
 // 選択されたメニューに対する処理
@@ -274,24 +295,16 @@ function selectMenu(selectedMenu) {
     gameState.served++;
     updateUI();
 
-    reactionMessageElement.textContent = reactionText;
-    reactionMessageElement.className = 'reaction-message';
-    reactionMessageElement.classList.add(reactionClass);
-    const faceImg = document.createElement('img');
-    faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
-    faceImg.alt = reactionFace;
-    reactionMessageElement.appendChild(faceImg);
+    const faceImgSrc = `img/${genderPrefix}_${reactionFace}.svg`;
 
     // 生徒カードの表情も更新
     const studentFaceImg = currentStudentElement.querySelector('.student-face img');
     if (studentFaceImg) {
-        studentFaceImg.src = faceImg.src;
+        studentFaceImg.src = faceImgSrc;
         studentFaceImg.alt = reactionFace;
     }
 
-    setTimeout(() => {
-        nextStudent();
-    }, 1000);
+    showCommentPopup(reactionText, faceImgSrc, reactionClass);
 }
 
 
