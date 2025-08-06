@@ -28,6 +28,16 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+.game-instructions {
+  width: 100%;
+  text-align: center;
+  background: #FFF3CD;
+  color: #555;
+  padding: 10px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
 /* 画面管理 */
 .screen {
   padding: 20px;

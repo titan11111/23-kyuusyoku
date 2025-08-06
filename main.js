@@ -84,7 +84,6 @@ let gameState = {
   served: 0,
   totalStudents: 32,
   isGameRunning: false,
-  todayMenu: [],
   correctAnswers: 0,
   wrongAnswers: 0,
   usedStudents: []
@@ -121,11 +120,26 @@ startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
 titleBtn.addEventListener('click', showTitleScreen);
 
+// ゲームルール表示
+function showGameInstructions() {
+  const existing = document.querySelector('.game-instructions');
+  if (existing) existing.remove();
+  const instructions = document.createElement('div');
+  instructions.innerText = '好きな給食を1つ選んであげよう！嫌いなものをあげると怒られるよ！';
+  instructions.className = 'game-instructions';
+  document.body.prepend(instructions);
+}
+
+function removeGameInstructions() {
+  const instructions = document.querySelector('.game-instructions');
+  if (instructions) instructions.remove();
+}
+
 // ゲーム開始
 function startGame() {
   resetGameState();
-  generateTodayMenu(); // メニューボタン生成のために呼び出しは維持
   showGameScreen();
+  showGameInstructions();
   startTimer();
   nextStudent();
 }
@@ -140,7 +154,6 @@ function resetGameState() {
       served: 0,
       totalStudents: students.length, // 生徒の総数を動的に取得
       isGameRunning: true,
-      todayMenu: [],
       correctAnswers: 0,
       wrongAnswers: 0,
       usedStudents: []
@@ -150,21 +163,19 @@ function resetGameState() {
   reactionMessageElement.className = 'reaction-message'; // クラスもリセット
 }
 
-// 今日のメニュー生成（ランダムに12個選択）
-function generateTodayMenu() {
-  const shuffled = [...menuItems].sort(() => Math.random() - 0.5);
-  gameState.todayMenu = shuffled.slice(0, 12);
-  
-  // menuListElementへの表示ロジックは削除されました
-  
-  // メニューボタン作成は引き続き必要
-  createMenuButtons();
+// 生徒に応じたメニュー選択肢を生成
+function generateMenuOptions(student) {
+  const options = [student.likes, student.dislikes];
+  const otherMenus = menuItems.filter(m => m !== student.likes && m !== student.dislikes);
+  const shuffled = [...otherMenus].sort(() => Math.random() - 0.5);
+  options.push(...shuffled.slice(0, 4));
+  return options.sort(() => Math.random() - 0.5);
 }
 
 // メニューボタン作成
-function createMenuButtons() {
+function createMenuButtons(options) {
   menuButtonsElement.innerHTML = '';
-  gameState.todayMenu.forEach(menu => {
+  options.forEach(menu => {
       const button = document.createElement('button');
       button.className = 'menu-button';
       button.textContent = menu;
@@ -207,6 +218,10 @@ function nextStudent() {
   // リアクションメッセージをクリア
   reactionMessageElement.textContent = '';
   reactionMessageElement.className = 'reaction-message'; // スタイルもリセット
+
+  // メニュー選択肢を生成して表示
+  const options = generateMenuOptions(gameState.currentStudent);
+  createMenuButtons(options);
 }
 
 // 選択されたメニューに対する処理
@@ -346,6 +361,7 @@ function updateUI() {
 
 // 画面表示制御
 function showTitleScreen() {
+  removeGameInstructions();
   titleScreen.classList.remove('hidden');
   gameScreen.classList.add('hidden');
   resultScreen.classList.add('hidden');
@@ -358,6 +374,7 @@ function showGameScreen() {
 }
 
 function showResultScreen() {
+  removeGameInstructions();
   titleScreen.classList.add('hidden');
   gameScreen.classList.add('hidden');
   resultScreen.classList.remove('hidden');
