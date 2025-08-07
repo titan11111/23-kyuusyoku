@@ -296,6 +296,7 @@ function selectMenu(selectedMenu) {
     faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
     faceImg.alt = reactionFace;
     reactionMessageElement.appendChild(faceImg);
+    showPopup(reactionText);
 
     // 生徒カードの表情も更新
     const studentFaceImg = currentStudentElement.querySelector('.student-face img');
@@ -309,6 +310,16 @@ function selectMenu(selectedMenu) {
     }, 1000);
 }
 
+
+function showPopup(message) {
+    const popup = document.createElement('div');
+    popup.className = 'comment-popup';
+    popup.textContent = message;
+    document.body.appendChild(popup);
+    setTimeout(() => {
+        popup.remove();
+    }, 2000);
+}
 
 // タイマー開始
 function startTimer() {

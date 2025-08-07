@@ -7,25 +7,16 @@
 
 body {
   font-family: 'MS PGothic', 'Hiragino Kaku Gothic Pro', sans-serif;
-  background: linear-gradient(135deg, #FFE5CC 0%, #FFF5E6 100%);
+  background: #fff;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  background-image: url('haikei.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  margin: 0;
   overflow-x: hidden;
 }
 
 .game-container {
   width: 100%;
-  max-width: 800px;
+  height: 100vh;
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   margin: 0 auto;
   padding: 10px;
 }
@@ -128,21 +119,18 @@ body {
 
 /* today-menu のスタイルは完全に削除されました */
 
+
 .game-main {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  justify-content: center; /* 中央寄せ */
-  /* 画面内に収めるため高さを調整し内部スクロールを許可 */
+  flex-direction: column;
+  gap: 10px;
   flex: 1 1 auto;
-  overflow-y: auto;
 }
 
 .student-area {
-  flex: 1;
-  min-width: 300px;
-  max-width: 45%; /* 画面幅の半分より少し狭くして隣の要素と並びやすくする */
+  flex: 0 0 30%;
+  max-height: 30%;
+  overflow-y: auto;
 }
 
 .student-card {
@@ -199,10 +187,13 @@ body {
   color: #1976D2;
 }
 
+
 .menu-selection {
   flex: 1;
-  min-width: 300px;
-  max-width: 45%; /* 画面幅の半分より少し狭くして隣の要素と並びやすくする */
+  max-height: 70%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-selection h3 {
@@ -212,10 +203,12 @@ body {
   font-size: 1.3em;
 }
 
+
 .menu-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  flex: 1;
 }
 
 .menu-button {
@@ -297,6 +290,26 @@ body {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
+}
+
+.comment-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* 結果画面 */
@@ -412,7 +425,7 @@ body {
   }
   
   .menu-buttons-grid {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
   }
 
@@ -460,7 +473,7 @@ body {
   }
   
   .menu-buttons-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
   }
 
   .menu-button {
@@ -479,6 +492,6 @@ body {
 
 @media (max-width: 360px) {
   .menu-buttons-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(3, 1fr);
   }
 }
