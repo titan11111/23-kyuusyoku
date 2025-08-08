@@ -106,6 +106,8 @@ const servedElement = document.getElementById('served');
 const currentStudentElement = document.getElementById('current-student');
 const menuButtonsElement = document.getElementById('menu-buttons');
 const reactionMessageElement = document.getElementById('reaction-message');
+const bgmAudio = document.getElementById('bgm');
+const saraAudio = document.getElementById('sara-sound');
 
 // 結果画面要素
 const finalScoreElement = document.getElementById('final-score');
@@ -141,6 +143,8 @@ function startGame() {
   showGameScreen();
   showGameInstructions();
   startTimer();
+  bgmAudio.currentTime = 0;
+  bgmAudio.play();
   nextStudent();
 }
 
@@ -187,7 +191,11 @@ function createMenuButtons(options) {
 // 次の生徒を選択
 function nextStudent() {
   if (!gameState.isGameRunning) return;
-  
+
+  // play plate sound
+  saraAudio.currentTime = 0;
+  saraAudio.play();
+
   // すでにすべての生徒に対応し終わった場合、ゲームを終了
   if (gameState.usedStudents.length >= gameState.totalStudents) {
       endGame();
@@ -338,6 +346,8 @@ function startTimer() {
 function endGame() {
   gameState.isGameRunning = false;
   clearInterval(gameInterval); // タイマーを停止
+  bgmAudio.pause();
+  bgmAudio.currentTime = 0;
 
   // 最終スコアの計算
   const finalScore = gameState.score;
