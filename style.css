@@ -378,15 +378,16 @@ body {
   }
   
   .score-info {
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       gap: 8px;
+      flex-wrap: nowrap;
+      justify-content: center;
   }
 
   .score-info span {
       padding: 6px 12px;
       font-size: 0.9em;
-      width: 100%;
       text-align: center;
   }
   
@@ -424,16 +425,16 @@ body {
       margin-bottom: 12px;
   }
   
-  .menu-buttons-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-  }
+    .menu-buttons-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
 
-  .menu-button {
-      padding: 10px 6px;
-      font-size: 0.95em;
-      min-height: 44px;
-  }
+    .menu-button {
+        padding: 5px 6px;
+        font-size: 0.95em;
+        min-height: 22px;
+    }
 
   .reaction-area {
       min-height: 50px;
