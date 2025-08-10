@@ -15,7 +15,7 @@ body {
 
 .game-container {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh; /* 画面内に収める */
   background: white;
   margin: 0 auto;
   padding: 10px;
@@ -90,6 +90,8 @@ body {
   /* スマホでスクロールせずにコメントを見られるように調整 */
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* 画面内に収める */
 }
 
 .game-header {
@@ -123,6 +125,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1; /* 残りの高さを占有 */
+  justify-content: space-between;
 }
 
 
@@ -184,6 +188,7 @@ body {
 .menu-selection {
   display: flex;
   flex-direction: column;
+  flex: 1; /* メニューを画面内に収める */
 }
 
 .menu-selection h3 {
@@ -197,7 +202,10 @@ body {
 .menu-buttons-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr); /* 3x3 のグリッド */
   gap: 2px;
+  flex: 1;
+  height: 100%;
 }
 
 .menu-button {
