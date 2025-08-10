@@ -172,7 +172,8 @@ function generateMenuOptions(student) {
   const options = [student.likes, student.dislikes];
   const otherMenus = menuItems.filter(m => m !== student.likes && m !== student.dislikes);
   const shuffled = [...otherMenus].sort(() => Math.random() - 0.5);
-  options.push(...shuffled.slice(0, 4));
+  // 合計9品になるようにランダムなメニューを7つ追加
+  options.push(...shuffled.slice(0, 7));
   return options.sort(() => Math.random() - 0.5);
 }
 
