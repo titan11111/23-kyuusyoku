@@ -49,31 +49,29 @@ const menuItems = [
   "野菜の煮付け", "ゼリー", "ピーマン炒め"
 ];
 
-// 給食メニューの類似性定義
-// キー：ある給食（生徒の好き嫌いになりうるもの）、値：その給食に似ていると判断される給食の配列
+// 類似性定義
 const similarFoods = {
-    "カレーライス": ["カツカレー", "カレーうどん"],
-    "牛乳": ["ミルメーク牛乳", "牛乳プリン"],
-    "揚げパン": ["きなこパン", "コッペパン"],
-    "焼き魚": ["さばの味噌煮"], 
-    "サラダ": ["サラダスパゲティ", "野菜炒め"],
-    "白ごはん": ["チャーハン", "中華丼", "チキンライス"], 
-    "パン": ["コッペパン", "きなこパン", "揚げパン"], 
-    "麺": ["ソフト麺ミートソース", "スパゲティナポリタン", "焼きそば", "焼きうどん", "冷やし中華", "カレーうどん"],
-    "汁物": ["たまごスープ", "わかめスープ", "コーンスープ", "シチュー", "ミネストローネ"],
-    "煮物": ["おでん", "ひじきの煮物", "野菜の煮付け", "カボチャの煮物"],
-    "デザート": ["冷凍みかん", "ミルク寒天", "牛乳プリン", "フルーツポンチ", "ゼリー", "フルーツヨーグルト"],
-    "ハンバーグ": ["フライドチキン", "ハムカツ"],
-    // 嫌いな給食の類似品についても定義しておくと良い
-    "酢の物": ["サラダ"], 
-    "ピーマン炒め": ["野菜炒め"],
-    "きのこソテー": ["野菜炒め"],
-    "トマト": ["野菜炒め", "サラダスパゲティ"],
-    "こんにゃく": ["しらたき"],
-    "豆腐": ["ミルク寒天", "牛乳プリン"], 
-    "ゼリー": ["ミルク寒天", "牛乳プリン", "フルーツヨーグルト"]
+  "カレーライス": ["カツカレー", "カレーうどん"],
+  "牛乳": ["ミルメーク牛乳", "牛乳プリン"],
+  "揚げパン": ["きなこパン", "コッペパン"],
+  "焼き魚": ["さばの味噌煮"],
+  "サラダ": ["サラダスパゲティ", "野菜炒め"],
+  "白ごはん": ["チャーハン", "中華丼", "チキンライス"],
+  "パン": ["コッペパン", "きなこパン", "揚げパン"],
+  "麺": ["ソフト麺ミートソース", "スパゲティナポリタン", "焼きそば", "焼きうどん", "冷やし中華", "カレーうどん"],
+  "汁物": ["たまごスープ", "わかめスープ", "コーンスープ", "シチュー", "ミネストローネ"],
+  "煮物": ["おでん", "ひじきの煮物", "野菜の煮付け", "カボチャの煮物"],
+  "デザート": ["冷凍みかん", "ミルク寒天", "牛乳プリン", "フルーツポンチ", "ゼリー", "フルーツヨーグルト"],
+  "ハンバーグ": ["フライドチキン", "ハムカツ"],
+  // 嫌い側
+  "酢の物": ["サラダ"],
+  "ピーマン炒め": ["野菜炒め"],
+  "きのこソテー": ["野菜炒め"],
+  "トマト": ["野菜炒め", "サラダスパゲティ"],
+  "こんにゃく": ["しらたき"],
+  "豆腐": ["ミルク寒天", "牛乳プリン"],
+  "ゼリー": ["ミルク寒天", "牛乳プリン", "フルーツヨーグルト"]
 };
-
 
 // ゲーム状態
 let gameState = {
@@ -101,8 +99,6 @@ const titleBtn = document.getElementById('title-btn');
 const scoreElement = document.getElementById('score');
 const timerElement = document.getElementById('timer');
 const servedElement = document.getElementById('served');
-// menuListElement は HTML から削除されたため、もう参照する必要はありません。
-// const menuListElement = document.getElementById('menu-list'); 
 const currentStudentElement = document.getElementById('current-student');
 const menuButtonsElement = document.getElementById('menu-buttons');
 const reactionMessageElement = document.getElementById('reaction-message');
@@ -115,23 +111,22 @@ const finalServedElement = document.getElementById('final-served');
 const accuracyElement = document.getElementById('accuracy');
 const resultMessageElement = document.getElementById('result-message');
 
-let gameInterval; // タイマーをクリアするためにグローバルスコープで宣言
+let gameInterval;
 
 // イベントリスナー
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
 titleBtn.addEventListener('click', showTitleScreen);
 
-// ゲームルール表示
+// ゲームルール表示（9個表記に修正）
 function showGameInstructions() {
   const existing = document.querySelector('.game-instructions');
   if (existing) existing.remove();
   const instructions = document.createElement('div');
-  instructions.innerText = '好きな給食を1つ選んであげよう！嫌いなものをあげると怒られるよ！';
+  instructions.innerText = '9個の給食から1つ選んであげよう！嫌いなものをあげると怒られるよ！';
   instructions.className = 'game-instructions';
   document.body.prepend(instructions);
 }
-
 function removeGameInstructions() {
   const instructions = document.querySelector('.game-instructions');
   if (instructions) instructions.remove();
@@ -148,252 +143,284 @@ function startGame() {
   nextStudent();
 }
 
-// ゲーム状態リセット
+// リセット
 function resetGameState() {
   gameState = {
-      currentStudent: null,
-      currentStudentIndex: 0,
-      score: 0,
-      timer: 60, // 制限時間を60秒に設定
-      served: 0,
-      totalStudents: students.length, // 生徒の総数を動的に取得
-      isGameRunning: true,
-      correctAnswers: 0,
-      wrongAnswers: 0,
-      usedStudents: []
+    currentStudent: null,
+    currentStudentIndex: 0,
+    score: 0,
+    timer: 60,
+    served: 0,
+    totalStudents: students.length,
+    isGameRunning: true,
+    correctAnswers: 0,
+    wrongAnswers: 0,
+    usedStudents: []
   };
   updateUI();
-  reactionMessageElement.textContent = ''; // リアクションメッセージをクリア
-  reactionMessageElement.className = 'reaction-message'; // クラスもリセット
+  reactionMessageElement.textContent = '';
+  reactionMessageElement.className = 'reaction-message';
 }
 
-// 生徒に応じたメニュー選択肢を生成
+// —— 選択肢生成（9個、4段階を必ず含む）——
 function generateMenuOptions(student) {
-  const options = [student.likes, student.dislikes];
-  const otherMenus = menuItems.filter(m => m !== student.likes && m !== student.dislikes);
-  const shuffled = [...otherMenus].sort(() => Math.random() - 0.5);
-  options.push(...shuffled.slice(0, 4));
-  return options.sort(() => Math.random() - 0.5);
+  const like = student.likes;
+  const dislike = student.dislikes;
+
+  const likeSims = (similarFoods[like] || []).filter(m => m !== like && m !== dislike);
+  const dislikeSims = (similarFoods[dislike] || []).filter(m => m !== like && m !== dislike);
+
+  // 重複防止
+  const options = new Set();
+
+  // 1) 正解（好き）
+  options.add(like);
+
+  // 2) 不正解の代表（嫌い）
+  options.add(dislike);
+
+  // 3) やや正解（好きに似ている）1つ確保（候補があれば）
+  if (likeSims.length > 0) {
+    options.add(likeSims[Math.floor(Math.random() * likeSims.length)]);
+  }
+
+  // 4) やや嫌い（嫌いに似ている）1つ確保（候補があれば）
+  if (dislikeSims.length > 0) {
+    options.add(dislikeSims[Math.floor(Math.random() * dislikeSims.length)]);
+  }
+
+  // 5) 中立を最低1つ
+  const neutralPool = menuItems.filter(m =>
+    m !== like &&
+    m !== dislike &&
+    !likeSims.includes(m) &&
+    !dislikeSims.includes(m)
+  );
+  if (neutralPool.length > 0) {
+    options.add(neutralPool[Math.floor(Math.random() * neutralPool.length)]);
+  }
+
+  // 6) 9個になるまで補充（重複なし）
+  const othersPool = menuItems.filter(m => !options.has(m));
+  for (let i = othersPool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [othersPool[i], othersPool[j]] = [othersPool[j], othersPool[i]];
+  }
+  for (const m of othersPool) {
+    options.add(m);
+    if (options.size >= 9) break;
+  }
+
+  // ランダム並べ替え
+  return Array.from(options).sort(() => Math.random() - 0.5);
 }
 
-// メニューボタン作成
+// メニューボタン
 function createMenuButtons(options) {
   menuButtonsElement.innerHTML = '';
   options.forEach(menu => {
-      const button = document.createElement('button');
-      button.className = 'menu-button';
-      button.textContent = menu;
-      button.addEventListener('click', () => selectMenu(menu));
-      menuButtonsElement.appendChild(button);
+    const button = document.createElement('button');
+    button.className = 'menu-button';
+    button.textContent = menu;
+    button.addEventListener('click', () => selectMenu(menu));
+    menuButtonsElement.appendChild(button);
   });
 }
 
-// 次の生徒を選択
+// 次の生徒
 function nextStudent() {
   if (!gameState.isGameRunning) return;
 
-  // play plate sound
+  // 皿音
   saraAudio.currentTime = 0;
   saraAudio.play();
 
-  // すでにすべての生徒に対応し終わった場合、ゲームを終了
+  // 全員対応済みなら終了
   if (gameState.usedStudents.length >= gameState.totalStudents) {
-      endGame();
-      return;
+    endGame();
+    return;
   }
 
-  // 未使用の生徒のインデックスをフィルタリング
-  const availableStudentIndices = students.map((_, index) => index)
-                                        .filter(index => !gameState.usedStudents.includes(index));
-
-  // 未使用の生徒からランダムに1人選択
-  const randomIndex = availableStudentIndices[Math.floor(Math.random() * availableStudentIndices.length)];
+  // 未使用からランダム
+  const available = students.map((_, i) => i).filter(i => !gameState.usedStudents.includes(i));
+  const randomIndex = available[Math.floor(Math.random() * available.length)];
   gameState.currentStudent = students[randomIndex];
-  gameState.usedStudents.push(randomIndex); // 使用済み生徒として追加
+  gameState.usedStudents.push(randomIndex);
 
-  // 生徒情報の表示を更新
+  // 生徒表示
   const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
   currentStudentElement.innerHTML = `
-      <div class="student-face"><img src="img/${genderPrefix}_${gameState.currentStudent.face}.svg" alt="${gameState.currentStudent.face}"></div>
-      <div class="student-name">${gameState.currentStudent.name}</div>
-      <div class="student-comment">「${gameState.currentStudent.comment}」</div>
-      <div class="student-preferences">
-          <div class="likes">好き：${gameState.currentStudent.likes}</div>
-          <div class="dislikes">嫌い：${gameState.currentStudent.dislikes}</div>
-      </div>
+    <div class="student-face"><img src="img/${genderPrefix}_${gameState.currentStudent.face}.svg" alt="${gameState.currentStudent.face}"></div>
+    <div class="student-name">${gameState.currentStudent.name}</div>
+    <div class="student-comment">「${gameState.currentStudent.comment}」</div>
+    <div class="student-preferences">
+      <div class="likes">好き：${gameState.currentStudent.likes}</div>
+      <div class="dislikes">嫌い：${gameState.currentStudent.dislikes}</div>
+    </div>
   `;
 
-  // リアクションメッセージをクリア
+  // リアクション初期化
   reactionMessageElement.textContent = '';
-  reactionMessageElement.className = 'reaction-message'; // スタイルもリセット
+  reactionMessageElement.className = 'reaction-message';
 
-  // メニュー選択肢を生成して表示
+  // 9個生成→表示
   const options = generateMenuOptions(gameState.currentStudent);
   createMenuButtons(options);
 }
 
-// 選択されたメニューに対する処理
+// 判定
 function selectMenu(selectedMenu) {
-    if (!gameState.isGameRunning || !gameState.currentStudent) return;
+  if (!gameState.isGameRunning || !gameState.currentStudent) return;
 
-    let reactionText = '';
-    let reactionFace = 'calm';
-    let reactionClass = '';
+  let reactionText = '';
+  let reactionFace = 'calm';
+  let reactionClass = '';
 
-    const studentLikes = gameState.currentStudent.likes;
-    const studentDislikes = gameState.currentStudent.dislikes;
+  const studentLikes = gameState.currentStudent.likes;
+  const studentDislikes = gameState.currentStudent.dislikes;
 
-    const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
+  const genderPrefix = gameState.currentStudent.gender === '男' ? 'boy' : 'girl';
 
-    if (selectedMenu === studentLikes) {
-        gameState.score += 100; // 好きな給食で大喜び
-        gameState.correctAnswers++;
-        reactionText = `「${selectedMenu}！やったー！ありがとう！」`;
-        reactionClass = 'good';
-        reactionFace = 'joy';
-    } else if (selectedMenu === studentDislikes) {
-        gameState.score -= 50; // 嫌いな給食は大幅減点
-        gameState.wrongAnswers++;
-        reactionText = `「えー…${selectedMenu}は苦手なんだよねぇ…」`;
-        reactionClass = 'worst';
-        reactionFace = 'angry';
+  if (selectedMenu === studentLikes) {
+    gameState.score += 100; // 正解
+    gameState.correctAnswers++;
+    reactionText = `「${selectedMenu}！やったー！ありがとう！」`;
+    reactionClass = 'good';
+    reactionFace = 'joy';
+  } else if (selectedMenu === studentDislikes) {
+    gameState.score -= 50; // 最悪
+    gameState.wrongAnswers++;
+    reactionText = `「えー…${selectedMenu}は苦手なんだよねぇ…」`;
+    reactionClass = 'worst';
+    reactionFace = 'angry';
+  } else {
+    const likedFoodSimilarities = similarFoods[studentLikes] || [];
+    const dislikedFoodSimilarities = similarFoods[studentDislikes] || [];
+
+    const isSimilarToLike = () => {
+      if (likedFoodSimilarities.includes(selectedMenu)) return true;
+      return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentLikes));
+    };
+    const isSimilarToDislike = () => {
+      if (dislikedFoodSimilarities.includes(selectedMenu)) return true;
+      return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentDislikes));
+    };
+
+    if (isSimilarToLike()) {
+      gameState.score += 30; // やや正解
+      gameState.correctAnswers++;
+      reactionText = `「おっ！${selectedMenu}！${studentLikes}に似てる！ありがとう！」`;
+      reactionClass = 'medium';
+      reactionFace = 'smile';
+    } else if (isSimilarToDislike()) {
+      gameState.score -= 30; // やや嫌い
+      gameState.wrongAnswers++;
+      reactionText = `「うわっ、${selectedMenu}かあ…${studentDislikes}に似てるからちょっと…」`;
+      reactionClass = 'bad';
+      reactionFace = 'sad';
     } else {
-        const likedFoodSimilarities = similarFoods[studentLikes] || [];
-        const dislikedFoodSimilarities = similarFoods[studentDislikes] || [];
-
-        // 類似判定は片方向の定義しかない場合もあるので、逆方向も確認
-        const isSimilarToLike = () => {
-            if (likedFoodSimilarities.includes(selectedMenu)) return true;
-            // 逆方向チェック
-            return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentLikes));
-        };
-
-        const isSimilarToDislike = () => {
-            if (dislikedFoodSimilarities.includes(selectedMenu)) return true;
-            return Object.entries(similarFoods).some(([key, arr]) => key === selectedMenu && arr.includes(studentDislikes));
-        };
-
-        if (isSimilarToLike()) {
-            gameState.score += 30; // 類似品は少し喜ぶ
-            gameState.correctAnswers++;
-            reactionText = `「おっ！${selectedMenu}！${studentLikes}に似てる！ありがとう！」`;
-            reactionClass = 'medium';
-            reactionFace = 'smile';
-        } else if (isSimilarToDislike()) {
-            gameState.score -= 30; // 嫌いなものに近くて残念
-            gameState.wrongAnswers++;
-            reactionText = `「うわっ、${selectedMenu}かあ…${studentDislikes}に似てるからちょっと…」`;
-            reactionClass = 'bad';
-            reactionFace = 'sad';
-        } else {
-            gameState.score -= 20; // どちらでもない場合
-            gameState.wrongAnswers++;
-            reactionText = `「うーん、これは今日じゃない気分かな…」`;
-            reactionClass = 'neutral';
-            reactionFace = 'calm';
-        }
+      gameState.score -= 20; // 中立
+      gameState.wrongAnswers++;
+      reactionText = `「うーん、これは今日じゃない気分かな…」`;
+      reactionClass = 'neutral';
+      reactionFace = 'calm';
     }
+  }
 
-    gameState.served++;
-    updateUI();
+  gameState.served++;
+  updateUI();
 
-    reactionMessageElement.textContent = reactionText;
-    reactionMessageElement.className = 'reaction-message';
-    reactionMessageElement.classList.add(reactionClass);
-    const faceImg = document.createElement('img');
-    faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
-    faceImg.alt = reactionFace;
-    reactionMessageElement.appendChild(faceImg);
-    showPopup(reactionText);
+  reactionMessageElement.textContent = reactionText;
+  reactionMessageElement.className = 'reaction-message';
+  reactionMessageElement.classList.add(reactionClass);
+  const faceImg = document.createElement('img');
+  faceImg.src = `img/${genderPrefix}_${reactionFace}.svg`;
+  faceImg.alt = reactionFace;
+  reactionMessageElement.appendChild(faceImg);
+  showPopup(reactionText);
 
-    // 生徒カードの表情も更新
-    const studentFaceImg = currentStudentElement.querySelector('.student-face img');
-    if (studentFaceImg) {
-        studentFaceImg.src = faceImg.src;
-        studentFaceImg.alt = reactionFace;
-    }
+  // 生徒カードの表情も更新
+  const studentFaceImg = currentStudentElement.querySelector('.student-face img');
+  if (studentFaceImg) {
+    studentFaceImg.src = faceImg.src;
+    studentFaceImg.alt = reactionFace;
+  }
 
-    setTimeout(() => {
-        nextStudent();
-    }, 1000);
+  setTimeout(() => {
+    nextStudent();
+  }, 1000);
 }
-
 
 function showPopup(message) {
-    const popup = document.createElement('div');
-    popup.className = 'comment-popup';
-    popup.textContent = message;
-    document.body.appendChild(popup);
-    setTimeout(() => {
-        popup.remove();
-    }, 2000);
+  const popup = document.createElement('div');
+  popup.className = 'comment-popup';
+  popup.textContent = message;
+  document.body.appendChild(popup);
+  setTimeout(() => {
+    popup.remove();
+  }, 2000);
 }
 
-// タイマー開始
+// タイマー
 function startTimer() {
-  clearInterval(gameInterval); // 既存のタイマーがあればクリア
+  clearInterval(gameInterval);
   gameInterval = setInterval(() => {
-      gameState.timer--;
-      updateUI();
-      if (gameState.timer <= 0) {
-          clearInterval(gameInterval); // タイマーを停止
-          endGame(); // ゲーム終了
-      }
-  }, 1000); // 1秒ごとに実行
+    gameState.timer--;
+    updateUI();
+    if (gameState.timer <= 0) {
+      clearInterval(gameInterval);
+      endGame();
+    }
+  }, 1000);
 }
 
-// ゲーム終了
+// 終了
 function endGame() {
   gameState.isGameRunning = false;
-  clearInterval(gameInterval); // タイマーを停止
+  clearInterval(gameInterval);
   bgmAudio.pause();
   bgmAudio.currentTime = 0;
 
-  // 最終スコアの計算
   const finalScore = gameState.score;
   const totalAttempts = gameState.correctAnswers + gameState.wrongAnswers;
   const accuracy = totalAttempts > 0 ? (gameState.correctAnswers / totalAttempts * 100).toFixed(1) : 0;
 
-  // 結果画面の表示を更新
   finalScoreElement.textContent = finalScore;
   finalServedElement.textContent = gameState.served;
   accuracyElement.textContent = `${accuracy}%`;
 
-  // 結果メッセージの生成
   let resultMessage = '';
   if (accuracy >= 80) {
-      resultMessage = "素晴らしい給食当番でした！みんな大満足です！";
+    resultMessage = "素晴らしい給食当番でした！みんな大満足です！";
   } else if (accuracy >= 50) {
-      resultMessage = "まずまずの腕前でしたね。もう少しでみんなを笑顔にできます！";
+    resultMessage = "まずまずの腕前でしたね。もう少しでみんなを笑顔にできます！";
   } else {
-      resultMessage = "ちょっと苦手な生徒が多かったかな？次は頑張ろう！";
+    resultMessage = "ちょっと苦手な生徒が多かったかな？次は頑張ろう！";
   }
   resultMessageElement.textContent = resultMessage;
 
-  showResultScreen(); // 結果画面に切り替え
+  showResultScreen();
 }
 
-// UI更新
+// UI
 function updateUI() {
   scoreElement.textContent = gameState.score;
   timerElement.textContent = gameState.timer;
   servedElement.textContent = `${gameState.served}/${gameState.totalStudents}`;
 }
 
-// 画面表示制御
+// 画面制御
 function showTitleScreen() {
   removeGameInstructions();
   titleScreen.classList.remove('hidden');
   gameScreen.classList.add('hidden');
   resultScreen.classList.add('hidden');
 }
-
 function showGameScreen() {
   titleScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   resultScreen.classList.add('hidden');
 }
-
 function showResultScreen() {
   removeGameInstructions();
   titleScreen.classList.add('hidden');
