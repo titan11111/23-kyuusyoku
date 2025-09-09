@@ -1,69 +1,795 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>きゅうしょく当番リズム</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>きゅうしょく当番｜単一 index.html</title>
+<style>
+  :root{
+    --bg:#F7F3E8; --chalk:#F9F9F9; --board:#1B3A2B; --wood:#A8753B;
+    --text:#222; --text2:#0B0B0B; --accent:#0C63E4;
+    --w:1280; --h:720; --fs:1; /* scale factor for font */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{margin:0;background:#111;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,Segoe UI,Roboto;}
+  /* Letterbox scaling container */
+  .fitbox{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#111;}
+  .stage{position:relative;width:1280px;height:720px;background:var(--bg);overflow:hidden;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  /* Header */
+  header{position:absolute;left:0;top:0;width:1280px;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:linear-gradient(#ffffffaa,#ffffff66);backdrop-filter:saturate(1.2)}
+  header .title{font-weight:700;color:var(--text2);font-size:calc(22px*var(--fs));letter-spacing:.02em}
+  header .meta{display:flex;gap:16px;align-items:center;font-size:calc(16px*var(--fs));}
+  header .badge{background:#fff;border:1px solid #ccc;border-radius:8px;padding:6px 10px;min-width:120px;text-align:center}
+  header .timerWrap{position:relative;width:44px;height:44px}
+  header .timerText{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(12px*var(--fs));}
+  /* Main layout */
+  .main{position:absolute;left:0;top:64px;width:1280px;height:656px;display:grid;grid-template-columns:820px 460px;grid-template-rows:360px 296px;grid-template-areas:"talk stand" "menu menu";}
+  .talk{grid-area:talk;padding:20px}
+  .stand{grid-area:stand;display:flex;align-items:center;justify-content:center}
+  .menu{grid-area:menu;padding:12px 20px 18px 20px}
+  /* Speech bubble */
+  .bubble{max-width:760px;min-height:120px;background:#fff;border-radius:12px;box-shadow:0 2px 0 rgba(0,0,0,.12);padding:20px;border:2px solid #ddd;transform:scale(.9);opacity:0;}
+  .bubble.show{animation:pop .35s forwards}
+  .bubble p{margin:0;font-size:calc(20px*var(--fs));line-height:1.4}
+  .bubble .name{font-weight:700;margin-bottom:6px;color:var(--text2)}
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  /* SVG face frame */
+  .faceCard{width:420px;height:540px;display:flex;align-items:center;justify-content:center}
+  .faceFrame{width:320px;height:420px}
+  /* 3x3 Menu grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .cell{height:72px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:12px;border:2px solid #ccc;background:#fff;cursor:pointer;outline:none;}
+  .cell[disabled]{opacity:.6;pointer-events:none}
+  .cell:focus{box-shadow:0 0 0 2px var(--accent);border-color:var(--accent)}
+  .icon{width:48px;height:48px}
+  .label{font-size:calc(18px*var(--fs));color:#111;}
+  .hint{font-size:calc(14px*var(--fs));color:#555}
+  /* Tooltip */
+  .tooltip{position:absolute;left:20px;top:70px;width:280px;height:80px;background:#fff;border:2px solid #ccc;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.15);padding:10px 12px;opacity:0;pointer-events:none}
+  .tooltip.show{animation:fadein .2s forwards}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  /* Overlays */
+  .overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center}
+  .overlay.show{display:flex}
+  .panel{width:840px;max-width:92%;background:#fff;border-radius:16px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+  .panel h1{font-size:calc(28px*var(--fs));margin:0 0 12px}
+  .panel h2{font-size:calc(22px*var(--fs));margin:20px 0 10px}
+  .panel p, .panel li, .panel label{font-size:calc(16px*var(--fs));}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{appearance:none;border:none;background:#0C63E4;color:#fff;padding:12px 16px;border-radius:12px;font-size:calc(18px*var(--fs));cursor:pointer}
+  .btn.sub{background:#ddd;color:#111}
+  .btn:focus{outline:2px solid #0C63E4}
+  /* High contrast mode */
+  .contrast .stage{background:#fff}
+  .contrast .bubble{background:#fff;border-color:#000}
+  .contrast .cell{background:#fff;border-color:#000}
+  .contrast body, .contrast .label, .contrast .panel{color:#000}
+  /* Header blackboard stripe backdrop */
+  .board{position:absolute;left:0;top:64px;width:1280px;height:100px;background:linear-gradient(180deg, #1B3A2B 0, #1B3A2B 70px, transparent 70px);}
+  /* Result board canvas */
+  #chalk{position:absolute;left:0;top:0;width:1280px;height:720px;pointer-events:none}
+  /* Responsive vertical stack for tall screens (handled by scale, but also reflow aid) */
+  @media (max-aspect-ratio: 9/16){
+    .main{grid-template-columns:1fr;grid-template-rows:260px 260px 1fr;grid-template-areas:"stand" "talk" "menu"}
+  }
+</style>
 </head>
 <body>
-    <audio id="bgm" src="audio/kyusyoku.mp3" loop></audio>
-    <audio id="sara-sound" src="audio/sara.mp3"></audio>
-    <div class="game-container">
-        <div id="title-screen" class="screen">
-            <h1>きゅうしょく当番リズム</h1>
-            <p>4年2組の給食当番になって、みんなを笑顔にしよう！</p>
-            <p>生徒の「好き」と「嫌い」を覚えて、今日のメニューから正しい給食を選んであげよう！</p>
-            <button id="start-btn" class="big-button">ゲームスタート</button>
+<div class="fitbox" id="fit">
+  <div class="stage" id="stage" role="application" aria-label="きゅうしょく当番 ゲーム">
+    <header>
+      <div class="title">きゅうしょく当番 <small style="font-weight:500;color:#555">v1.0</small></div>
+      <div class="meta">
+        <div class="badge" id="progress" aria-live="polite">0 / 30</div>
+        <div class="badge" id="combo">コンボ 0</div>
+        <div class="timerWrap" aria-hidden="true">
+          <canvas id="timer" width="44" height="44"></canvas>
+          <div class="timerText" id="timerText">—</div>
         </div>
-
-        <div id="game-screen" class="screen hidden">
-            <div class="game-header">
-                <div class="score-info">
-                    <span>スコア: <span id="score">0</span></span>
-                    <span>残り時間: <span id="timer">60</span>秒</span>
-                    <span>対応した生徒: <span id="served">0/32</span></span>
-                </div>
-            </div>
-
-            <div class="game-main">
-                <div class="student-area">
-                    <h3>次の生徒</h3>
-                    <div id="current-student" class="student-card"></div>
-                </div>
-                <div class="menu-selection">
-                    <h3>給食を選んであげよう！</h3>
-                    <div id="menu-buttons" class="menu-buttons-grid"></div>
-                </div>
-            </div>
-
-            <div class="reaction-area">
-                <div id="reaction-message" class="reaction-message"></div>
-            </div>
+      </div>
+    </header>
+    <div class="board" aria-hidden="true"></div>
+    <canvas id="chalk" width="1280" height="720"></canvas>
+    <div class="main">
+      <div class="talk">
+        <div class="bubble" id="bubble" aria-live="polite">
+          <div class="name" id="studentName">—</div>
+          <p id="speech">ボタンで はじめてください。</p>
         </div>
-
-        <div id="result-screen" class="screen hidden">
-            <h2>結果発表！</h2>
-            <div class="result-stats">
-                <div class="stat">
-                    <div class="stat-label">最終スコア</div>
-                    <div id="final-score" class="stat-value">0</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">対応した生徒数</div>
-                    <div id="final-served" class="stat-value">0</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">正答率</div>
-                    <div id="accuracy" class="stat-value">0%</div>
-                </div>
-            </div>
-            <p id="result-message" class="result-message"></p>
-            <button id="restart-btn" class="big-button">もう一度遊ぶ</button>
-            <button id="title-btn" class="big-button">タイトルに戻る</button>
+      </div>
+      <div class="stand">
+        <div class="faceCard">
+          <svg class="faceFrame" id="face" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg" aria-label="生徒の顔イラスト" role="img"></svg>
         </div>
+      </div>
+      <div class="menu">
+        <div class="grid" id="grid" role="grid" aria-label="給食を選ぶ 3x3">
+          <!-- cells injected -->
+        </div>
+      </div>
     </div>
 
-    <script src="main.js"></script>
+    <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+    <!-- Title / Tutorial / Pause / Settings / Result Overlays -->
+    <div class="overlay show" id="titleOv" aria-modal="true" role="dialog">
+      <div class="panel">
+        <h1>きゅうしょく当番</h1>
+        <p>9つの給食から1つを選んで、目の前の子がよろこぶものを配ります。読み上げはON/OFFできます。</p>
+        <div class="row">
+          <button class="btn" id="startBtn">はじめる</button>
+          <button class="btn sub" id="howBtn">あそびかた</button>
+          <button class="btn sub" id="optBtn">設定</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="howOv" aria-modal="true" role="dialog">
+      <div class="panel">
+        <h2>あそびかた（30秒）</h2>
+        <ul>
+          <li>ふきだしに <b>好き</b> と <b>苦手</b> が必ず出ます。</li>
+          <li>下の 9つから 1つ 選びます。フォーカスでヒントが出ます。</li>
+          <li>判定：<b>+20</b> / <b>+10</b> / <b>0</b> / <b>-15</b> / <b>-25</b>。</li>
+          <li>←→↑↓ で移動 / Enter 決定 / Esc で一時停止。</li>
+        </ul>
+        <div class="row"><button class="btn" id="howOk">はじめる</button></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseOv" aria-modal="true" role="dialog">
+      <div class="panel">
+        <h2>一時停止</h2>
+        <div class="row">
+          <button class="btn" id="resumeBtn">つづける</button>
+          <button class="btn sub" id="optBtn2">設定</button>
+          <button class="btn sub" id="toTitleBtn">タイトルへ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="optOv" aria-modal="true" role="dialog">
+      <div class="panel">
+        <h2>設定</h2>
+        <div class="row" style="gap:20px">
+          <label>BGM音量 <input id="bgmVol" type="range" min="0" max="100" value="60"/></label>
+          <label>SFX音量 <input id="sfxVol" type="range" min="0" max="100" value="70"/></label>
+          <label>読み上げ <select id="ttsOn"><option>ON</option><option>OFF</option></select></label>
+          <label>タイマー <select id="selTimer"><option>10</option><option>12</option><option>8</option><option>6</option><option>OFF</option></select> 秒</label>
+          <label>フォント <select id="fontPct"><option value="1">100%</option><option value="1.1">110%</option><option value="1.2">120%</option></select></label>
+          <label>カラーモード <select id="colorMode"><option>標準</option><option>高コントラスト</option></select></label>
+        </div>
+        <div class="row"><button class="btn" id="optClose">とじる</button></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="resultOv" aria-modal="true" role="dialog">
+      <div class="panel" id="resultPanel">
+        <h2>結果発表</h2>
+        <div id="resultText" style="font-size:calc(18px*var(--fs));line-height:1.6"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="replayBtn">もう一度</button>
+          <button class="btn sub" id="resTitleBtn">タイトルへ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG symbols for food icons (48x48 stroke 2) -->
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <!-- curry -->
+        <symbol id="ic-curry" viewBox="0 0 48 48">
+          <rect x="6" y="22" width="36" height="14" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+          <path d="M8 29c6-6 26-6 32 0" fill="#8B4513" stroke="#69320f" stroke-width="2"/>
+          <path d="M18 10 C20 6, 28 6, 30 10 M24 8 C26 5, 29 5, 31 8 M14 12 C16 8, 20 8, 22 12" fill="none" stroke="#999" stroke-width="2"/>
+        </symbol>
+        <!-- milk -->
+        <symbol id="ic-milk" viewBox="0 0 48 48">
+          <path d="M14 10l20 0 -2 6 0 22 -16 0 0-22z" fill="#fff" stroke="#333" stroke-width="2"/>
+          <rect x="14" y="16" width="20" height="6" fill="#2e6fe4"/>
+          <text x="18" y="29" font-size="8" fill="#2e6fe4">ぎゅう</text>
+          <text x="18" y="38" font-size="8" fill="#2e6fe4">にゅう</text>
+        </symbol>
+        <!-- bread -->
+        <symbol id="ic-bread" viewBox="0 0 48 48">
+          <ellipse cx="24" cy="24" rx="18" ry="10" fill="#D2A679" stroke="#333" stroke-width="2"/>
+          <g fill="#fff">
+            <circle r="1" cx="18" cy="20"/>
+            <circle r="1" cx="20" cy="24"/>
+            <circle r="1" cx="26" cy="22"/>
+            <circle r="1" cx="30" cy="26"/>
+            <circle r="1" cx="22" cy="28"/>
+            <circle r="1" cx="28" cy="18"/>
+          </g>
+        </symbol>
+        <!-- fish -->
+        <symbol id="ic-fish" viewBox="0 0 48 48">
+          <path d="M8 24 l12 -8 12 8 -12 8z" fill="#E0A84F" stroke="#333" stroke-width="2"/>
+          <circle cx="29" cy="24" r="2" fill="#333"/>
+          <g stroke="#b57f2e" stroke-width="1">
+            <circle r="1" cx="12" cy="22"/>
+            <circle r="1" cx="18" cy="25"/>
+            <circle r="1" cx="24" cy="21"/>
+          </g>
+        </symbol>
+        <!-- soup -->
+        <symbol id="ic-soup" viewBox="0 0 48 48">
+          <rect x="8" y="18" width="32" height="12" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+          <rect x="10" y="22" width="28" height="6" rx="3" fill="#ffe7a1"/>
+          <g fill="#f3c341">
+            <rect x="14" y="24" width="3" height="3"/>
+            <rect x="20" y="24" width="3" height="3"/>
+            <rect x="26" y="24" width="3" height="3"/>
+            <rect x="32" y="24" width="3" height="3"/>
+          </g>
+        </symbol>
+        <!-- salad -->
+        <symbol id="ic-salad" viewBox="0 0 48 48">
+          <rect x="10" y="22" width="28" height="10" rx="5" fill="#d8f0d0" stroke="#333" stroke-width="2"/>
+          <rect x="12" y="24" width="24" height="6" rx="3" fill="#a4d18f"/>
+          <rect x="16" y="26" width="5" height="3" fill="#e5d29c"/>
+          <circle cx="30" cy="27" r="2" fill="#79b081"/>
+        </symbol>
+        <!-- hijiki -->
+        <symbol id="ic-hijiki" viewBox="0 0 48 48">
+          <rect x="6" y="18" width="36" height="12" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+          <g stroke="#111" stroke-width="2" stroke-linecap="round">
+            <path d="M12 23 l4 4"/>
+            <path d="M18 25 l3 -3"/>
+            <path d="M24 23 l5 5"/>
+            <path d="M30 26 l4 -4"/>
+          </g>
+          <g fill="#e07a3f"><rect x="16" y="24" width="3" height="3"/><rect x="28" y="24" width="3" height="3"/></g>
+        </symbol>
+        <!-- fruit -->
+        <symbol id="ic-fruit" viewBox="0 0 48 48">
+          <rect x="10" y="18" width="28" height="12" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+          <g fill="#f25f5c"><circle r="3" cx="18" cy="24"/></g>
+          <g fill="#f2c641"><circle r="3" cx="24" cy="25"/></g>
+          <g fill="#5cc8f2"><circle r="3" cx="30" cy="23"/></g>
+        </symbol>
+        <!-- pudding -->
+        <symbol id="ic-pudding" viewBox="0 0 48 48">
+          <path d="M14 18 h20 l-4 14 h-12 z" fill="#EAD27A" stroke="#333" stroke-width="2"/>
+          <rect x="14" y="18" width="20" height="6" fill="#7A3B13"/>
+        </symbol>
+      </defs>
+    </svg>
+
+  </div>
+</div>
+<script>
+(()=>{
+  'use strict';
+  /* ================= CONFIG ================= */
+  const CONFIG={
+    BASE_W:1280, BASE_H:720, MIN_W:360, MIN_H:640, MAX_W:1920, MAX_H:1080,
+    COLORS:{bg:'#F7F3E8', board:'#1B3A2B', chalk:'#F9F9F9', wood:'#A8753B', text:'#222', accent:'#0C63E4'},
+    TIMER_OPTIONS:[6,8,10,12], DEFAULT_TIMER:10,
+    FONT_SCALE:1, CONTRAST:false,
+    FOODS:[
+      {id:'curry', name:'カレーライス', icon:'ic-curry', tags:['カレー','辛い','主食','温かい']},
+      {id:'milk', name:'牛乳', icon:'ic-milk', tags:['牛乳','飲み物','乳製品']},
+      {id:'bread', name:'きなこ揚げパン', icon:'ic-bread', tags:['パン','甘い','揚げ','主食']},
+      {id:'fish', name:'白身魚フライ', icon:'ic-fish', tags:['魚','揚げ','たんぱく']},
+      {id:'soup', name:'コーンスープ', icon:'ic-soup', tags:['スープ','甘め','温かい','コーン']},
+      {id:'salad', name:'ポテトサラダ', icon:'ic-salad', tags:['野菜','じゃがいも','冷たい']},
+      {id:'hijiki', name:'ひじき煮', icon:'ic-hijiki', tags:['和食','海藻','健康']},
+      {id:'fruit', name:'フルーツポンチ', icon:'ic-fruit', tags:['デザート','甘い','冷たい','果物']},
+      {id:'pudding', name:'プリン', icon:'ic-pudding', tags:['デザート','甘い','プリン']},
+    ],
+    SCORE:{easy:{like:25, soft:12, neutral:0, dislike:-12, hard:-20}, normal:{like:20, soft:10, neutral:0, dislike:-15, hard:-25}, hard:{like:18, soft:8, neutral:0, dislike:-18, hard:-28}},
+    DIFFICULTY:'normal',
+    BASE_AFFINITY:50,
+    RNG_SEED:19780402,
+    VOICE_RETRIES:4, VOICE_RETRY_MS:500,
+    TTS:{rate:.95,pitch:1.0,volume:.9},
+    BGM:{BPM:92, KEY:'C', LOOP_BARS:8},
+    DEBUG:Boolean(window.__DEBUG__),
+  };
+
+  /* =============== STATE MACHINE =============== */
+  const State={TITLE:'TITLE', TUTORIAL:'TUTORIAL', SERVE:'SERVE', RESULT:'RESULT', PAUSE:'PAUSE'};
+  let currentState=State.TITLE;
+  let allowInput=true;
+  let settings={bgm:0.6, sfx:0.7, tts:true, timer:CONFIG.DEFAULT_TIMER, font:1, contrast:false, difficulty:'normal'};
+
+  /* =============== DOM refs =============== */
+  const fit=document.getElementById('fit');
+  const stage=document.getElementById('stage');
+  const bubble=document.getElementById('bubble');
+  const studentNameEl=document.getElementById('studentName');
+  const speechEl=document.getElementById('speech');
+  const grid=document.getElementById('grid');
+  const tooltip=document.getElementById('tooltip');
+  const timerCanvas=document.getElementById('timer');
+  const timerText=document.getElementById('timerText');
+  const progressEl=document.getElementById('progress');
+  const comboEl=document.getElementById('combo');
+  const faceSVG=document.getElementById('face');
+  const chalkCanvas=document.getElementById('chalk');
+  const chalkCtx=chalkCanvas.getContext('2d');
+  const ctxTimer=timerCanvas.getContext('2d');
+
+  const ovTitle=document.getElementById('titleOv');
+  const ovHow=document.getElementById('howOv');
+  const ovPause=document.getElementById('pauseOv');
+  const ovOpt=document.getElementById('optOv');
+  const ovResult=document.getElementById('resultOv');
+
+  // Buttons
+  const startBtn=document.getElementById('startBtn');
+  const howBtn=document.getElementById('howBtn');
+  const howOk=document.getElementById('howOk');
+  const optBtn=document.getElementById('optBtn');
+  const optBtn2=document.getElementById('optBtn2');
+  const optClose=document.getElementById('optClose');
+  const resumeBtn=document.getElementById('resumeBtn');
+  const toTitleBtn=document.getElementById('toTitleBtn');
+  const resTitleBtn=document.getElementById('resTitleBtn');
+  const replayBtn=document.getElementById('replayBtn');
+
+  // Settings controls
+  const bgmVol=document.getElementById('bgmVol');
+  const sfxVol=document.getElementById('sfxVol');
+  const ttsOn=document.getElementById('ttsOn');
+  const selTimer=document.getElementById('selTimer');
+  const fontPct=document.getElementById('fontPct');
+  const colorMode=document.getElementById('colorMode');
+
+  /* =============== Utility: Scaling =============== */
+  function applyScale(){
+    const sw=CONFIG.BASE_W, sh=CONFIG.BASE_H;
+    let vw=window.innerWidth, vh=window.innerHeight;
+    // clamp viewport
+    vw=Math.min(Math.max(vw, CONFIG.MIN_W), CONFIG.MAX_W);
+    vh=Math.min(Math.max(vh, CONFIG.MIN_H), CONFIG.MAX_H);
+    const scale=Math.min(vw/sw, vh/sh);
+    stage.style.transform=`scale(${scale})`;
+    stage.style.transformOrigin='center center';
+    fit.style.setProperty('paddingLeft', `${(vw-sw*scale)/2}px`);
+    fit.style.setProperty('paddingRight', `${(vw-sw*scale)/2}px`);
+    fit.style.setProperty('paddingTop', `${(vh-sh*scale)/2}px`);
+    fit.style.setProperty('paddingBottom', `${(vh-sh*scale)/2}px`);
+    document.documentElement.style.setProperty('--fs', settings.font);
+    document.body.classList.toggle('contrast', settings.contrast);
+  }
+  window.addEventListener('resize', applyScale);
+
+  /* =============== RNG (LCG) =============== */
+  function RNG(seed){let s=seed>>>0; return ()=> (s=(s*1664525+1013904223)>>>0, (s>>>0)/4294967296);}
+  const rnd=RNG(CONFIG.RNG_SEED);
+  function pick(arr){return arr[Math.floor(rnd()*arr.length)]}
+
+  /* =============== Audio (Web Audio) =============== */
+  let AC=null, masterGain, sfxGain, bgmGain, limiter;
+  let audioUnlocked=false;
+  function ensureAudio(){
+    if(!AC){
+      AC=new (window.AudioContext||window.webkitAudioContext)();
+      masterGain=AC.createGain(); masterGain.gain.value=1.0; masterGain.connect(AC.destination);
+      // Simple limiter
+      limiter=AC.createDynamicsCompressor();
+      limiter.threshold.setValueAtTime(-6, AC.currentTime);
+      limiter.knee.setValueAtTime(10, AC.currentTime);
+      limiter.ratio.setValueAtTime(12, AC.currentTime);
+      limiter.attack.setValueAtTime(0.003, AC.currentTime);
+      limiter.release.setValueAtTime(0.250, AC.currentTime);
+      limiter.connect(masterGain);
+      sfxGain=AC.createGain(); sfxGain.gain.value=settings.sfx; sfxGain.connect(limiter);
+      bgmGain=AC.createGain(); bgmGain.gain.value=settings.bgm; bgmGain.connect(limiter);
+      setupBGM();
+    }
+    if(AC.state==='suspended'){AC.resume();}
+    audioUnlocked=true;
+  }
+  function setVolumes(){
+    if(!AC) return;
+    sfxGain.gain.value=settings.sfx;
+    bgmGain.gain.value=settings.bgm;
+  }
+
+  // SFX generators
+  function sfxDecision(){// 決定：矩形A4 30ms + ノイズ20ms
+    if(!AC) return; const now=AC.currentTime;
+    const o=AC.createOscillator(); o.type='square'; o.frequency.setValueAtTime(440, now);
+    const g=AC.createGain(); g.gain.setValueAtTime(0.4, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.03);
+    o.connect(g).connect(sfxGain); o.start(now); o.stop(now+0.03);
+    const n=AC.createBuffer(1, AC.sampleRate*0.02, AC.sampleRate); const d=n.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.3; const nb=AC.createBufferSource(); nb.buffer=n; const ng=AC.createGain(); ng.gain.value=0.5; nb.connect(ng).connect(sfxGain); nb.start(now);
+  }
+  function sfxCorrect(){// 三角 C5→E5→G5
+    if(!AC) return; const now=AC.currentTime; const seq=[523.25,659.25,783.99];
+    seq.forEach((f,i)=>{const o=AC.createOscillator(); o.type='triangle'; const g=AC.createGain(); const t=now+i*0.06; o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f+40, t+0.02); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.06); o.connect(g).connect(sfxGain); o.start(t); o.stop(t+0.06);});
+  }
+  function sfxWrong(){// ノイズ + 低周波サイン 220Hz 180ms
+    if(!AC) return; const now=AC.currentTime;
+    const o=AC.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(220, now);
+    const g=AC.createGain(); g.gain.setValueAtTime(0.6, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.18);
+    o.connect(g).connect(sfxGain); o.start(now); o.stop(now+0.18);
+    const n=AC.createBuffer(1, AC.sampleRate*0.18, AC.sampleRate); const d=n.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.2; const nb=AC.createBufferSource(); nb.buffer=n; const ng=AC.createGain(); ng.gain.value=0.4; nb.connect(ng).connect(sfxGain); nb.start(now);
+  }
+  function sfxBubble(){// ホイッスル 880→1320 120ms
+    if(!AC) return; const now=AC.currentTime; const o=AC.createOscillator(); o.type='sine'; const g=AC.createGain(); o.frequency.setValueAtTime(880, now); o.frequency.linearRampToValueAtTime(1320, now+0.12); g.gain.setValueAtTime(0.4, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.12); o.connect(g).connect(sfxGain); o.start(now); o.stop(now+0.12);
+  }
+
+  // BGM: 8小節 92BPM シーケンサ（rAFでスケジューリング）
+  let bgmPlaying=false; let nextNoteTime=0; let current16th=0; const lookahead=0.1; // seconds
+  const bpm=CONFIG.BGM.BPM; const spb=60/bpm; const noteDur=spb/4; // 16th
+  function setupBGM(){ nextNoteTime=AC.currentTime+0.1; current16th=0; bgmPlaying=true; }
+  function scheduleNote(time, freq, type, gain){
+    const o=AC.createOscillator(); const g=AC.createGain(); o.type=type; o.frequency.setValueAtTime(freq, time); g.gain.setValueAtTime(gain, time); g.gain.exponentialRampToValueAtTime(0.001, time+noteDur*0.95); o.connect(g).connect(bgmGain); o.start(time); o.stop(time+noteDur);
+  }
+  function bgmTick(){ if(!AC||!bgmPlaying) return; const now=AC.currentTime; while(nextNoteTime<now+lookahead){ // schedule
+      const step=current16th % (CONFIG.BGM.LOOP_BARS*16);
+      // Simple arrangement: bass every 4th, chords on beats, melody pattern per spec degrees
+      if(step%4===0){ // bass
+        scheduleNote(nextNoteTime, 110, 'sine', 0.15);
+      }
+      if(step%4===0){ // chord triads (rough)
+        const chordIdx=Math.floor(step/16)%4; // I vi IV V
+        const chords=[[261.63,329.63,392.00],[220.00,261.63,329.63],[349.23,440.00,523.25],[392.00,493.88,587.33]];
+        chords[chordIdx].forEach(f=>scheduleNote(nextNoteTime, f, 'sawtooth', 0.05));
+      }
+      // melody degrees pattern across 8 bars
+      const pattern=[5,6,5,3, 2,3,2,1, 3,4,3,2, 1,2,3,5,  5,6,5,3, 2,3,2,1, 3,2,1,2, 5,5,5,5];
+      const deg=pattern[step%pattern.length];
+      const scale=[261.63,293.66,329.63,349.23,392.00,440.00,493.88]; // C D E F G A B
+      const f=scale[deg-1];
+      if(step%2===0){ scheduleNote(nextNoteTime, f, 'square', 0.06); }
+      // noise bed (tape hiss)
+      if(step%16===0){ const n=AC.createBuffer(1, AC.sampleRate*spb*4, AC.sampleRate); const d=n.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.01; const nb=AC.createBufferSource(); nb.buffer=n; const ng=AC.createGain(); ng.gain.value=0.02; nb.connect(ng).connect(bgmGain); nb.start(nextNoteTime); nb.stop(nextNoteTime+spb*4); }
+      nextNoteTime+=noteDur; current16th++;
+    }
+  }
+
+  /* =============== TTS =============== */
+  let voices=[], jaVoice=null, ttsEnabled=true; let voiceReady=false;
+  function loadVoices(retry=CONFIG.VOICE_RETRIES){
+    voices=speechSynthesis.getVoices();
+    if(!voices.length && retry>0){ setTimeout(()=>loadVoices(retry-1), CONFIG.VOICE_RETRY_MS); return; }
+    const pref=['Kyoko','Otoya','Siri','ja-JP'];
+    jaVoice = voices.find(v=>v.lang.startsWith('ja') && (v.name.includes('Kyoko')||v.name.includes('Otoya')||v.name.includes('Siri')))
+           || voices.find(v=>v.lang.startsWith('ja')) || null;
+    voiceReady=true;
+  }
+  window.speechSynthesis && speechSynthesis.onvoiceschanged!==undefined && speechSynthesis.addEventListener('voiceschanged', ()=>loadVoices());
+  if('speechSynthesis' in window){ loadVoices(); }
+  function speak(text){
+    if(!ttsEnabled||!('speechSynthesis' in window)) return;
+    const u=new SpeechSynthesisUtterance(text); if(jaVoice) u.voice=jaVoice; u.lang='ja-JP'; u.rate=CONFIG.TTS.rate; u.pitch=CONFIG.TTS.pitch; u.volume=CONFIG.TTS.volume; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+
+  /* =============== Data: students auto generation (seeded) =============== */
+  const maleNames=['たかし','ゆうと','そうた','はると','だいち','りく','けんと','そうま','いつき','はやと','りょう','ゆうき','ひろと','こうた','まさき'];
+  const femaleNames=['みさき','さくら','はな','りん','ゆい','あおい','ここね','ひより','ひな','みお','かほ','えま','ゆな','あかり','ほのか'];
+  const personalitiesM=['元気・素直','おおらか・やさしい','てきぱき・前向き','おだやか・慎重','好奇心旺盛','がんばり屋'];
+  const personalitiesF=['ていねい・明るい','しっかり者','やさしい・気配り','おっとり','まじめ・努力家','ほんわか']
+
+  /** Generate 30 students with distributed likes/dislikes and talks */
+  function genStudents(){
+    const foods=CONFIG.FOODS.map(f=>f.name.replace('/','')); // names
+    // Counters to satisfy distribution likes:6-10, dislikes:4-8 per food
+    const likeCount=Object.fromEntries(foods.map(n=>[n,0]));
+    const dislikeCount=Object.fromEntries(foods.map(n=>[n,0]));
+    const students=[]; let id=1;
+    const genders=[...Array(15).fill('M'),...Array(15).fill('F')];
+    // shuffle genders order
+    genders.sort(()=>rnd()-.5);
+    for(let i=0;i<30;i++){
+      const gender=genders[i];
+      const name= gender==='M'? maleNames[i%maleNames.length] : femaleNames[i%femaleNames.length];
+      const persona= gender==='M'? pick(personalitiesM):pick(personalitiesF);
+      // assign likes/dislikes (2-3 each, no overlap)
+      let likes=[], dislikes=[];
+      const pool=[...foods];
+      while(likes.length<2){ const c=pick(pool); if(!likes.includes(c)){ likes.push(c); likeCount[c]++; }}
+      if(rnd()<0.5){ let c=pick(pool); if(!likes.includes(c)){ likes.push(c); likeCount[c]++; }}
+      // dislikes distinct
+      while(dislikes.length<2){ const c=pick(pool); if(!likes.includes(c)&&!dislikes.includes(c)){ dislikes.push(c); dislikeCount[c]++; }}
+      if(rnd()<0.5){ let c=pick(pool); if(!likes.includes(c)&&!dislikes.includes(c)){ dislikes.push(c); dislikeCount[c]++; }}
+      const svgSeed=(rnd()*1e5|0);
+      students.push({id:id++, name, gender, likes, dislikes, personality:persona, talk:'', svgSeed, baseAffinity:CONFIG.BASE_AFFINITY});
+    }
+    // talks
+    students.forEach(s=>{ s.talk = buildTalk(s); });
+    // If DEBUG: set all likes to curry
+    if(CONFIG.DEBUG){ students.forEach(s=>{ s.likes=['カレーライス']; s.talk=buildTalk(s); }); }
+    return students;
+  }
+
+  function buildTalk(s){
+    // Templates A/B/C ensure 80-120 chars and include nouns of likes/dislikes
+    const L1=s.likes[0], L2=s.likes[1]||s.likes[0]; const D1=s.dislikes[0];
+    const tA=`こんにちは。今日はおなかがすきました。**${L1}**が大好きで、においだけで幸せです。**${D1}**はちょっと苦手。給食当番さん、できれば${L2}をお願いします。`;
+    const tB=`やあ。ぼく、最近走る練習をしてるよ。**${L1}**を食べると力が出るんだ。だけど**${D1}**は残しがち。今日はがんばるけど、選べるなら${L2}がうれしいな。`;
+    const tC=`ねえ、匂いがいいね。あの、甘いものって元気が出るよね。**${L1}**とか。反対に**${D1}**は少し苦手でね……。でも、みんなで食べるのは好き。できれば${L2}だとうれしい。`;
+    const arr=[tA,tB,tC]; let draft=pick(arr);
+    // Ensure 80-120 full-width chars (approx). If too short, pad small trait note.
+    const trait= s.personality.includes('元気')? '走るのは得意。' : s.personality.includes('やさしい')? '配るの手伝うね。' : '休み時間は読書。';
+    if (lenJP(draft)<80) draft+=trait;
+    if (lenJP(draft)>120) draft=draft.slice(0,118)+'。';
+    // enforce ** marker replace to plain but keep words; also ensure contains 好き and 苦手 terms
+    draft=draft.replaceAll('**','');
+    if(!draft.includes('好き')) draft = draft.replace(L1, `${L1}が好き`);
+    if(!draft.includes('苦手')) draft = draft.replace(D1, `${D1}は苦手`);
+    return draft;
+  }
+  function lenJP(t){return [...t].length}
+
+  /* =============== Judge logic =============== */
+  function tagsFor(foodName){ return CONFIG.FOODS.find(f=>f.name===foodName)?.tags||[]; }
+  function foodById(id){ return CONFIG.FOODS.find(f=>f.id===id); }
+
+  function judge(student, selectedFood){
+    // Build like/dislike tag sets from student's lists
+    const likeTags=new Set(student.likes.flatMap(n=> tagsFor(n)));
+    const dislikeTags=new Set(student.dislikes.flatMap(n=> tagsFor(n)));
+    const f=foodById(selectedFood);
+    const tags=f.tags;
+    const sc=CONFIG.SCORE[settings.difficulty];
+    let type='neutral', delta=0;
+    if(student.likes.includes(f.name)){ type='like'; delta=sc.like; }
+    else if(student.dislikes.includes(f.name)){ type='dislike'; delta=sc.dislike; }
+    else{
+      const likeHits=tags.filter(t=>likeTags.has(t)).length;
+      const dislikeHits=tags.filter(t=>dislikeTags.has(t)).length;
+      if(dislikeHits>=2){ type='hard'; delta=sc.hard; }
+      else if(likeHits>=1){ type='soft'; delta=sc.soft; }
+      else { type='neutral'; delta=sc.neutral; }
+    }
+    return {type, delta};
+  }
+
+  /* =============== UI: Grid build =============== */
+  function buildGrid(){
+    grid.innerHTML='';
+    CONFIG.FOODS.forEach((f,idx)=>{
+      const btn=document.createElement('button');
+      btn.className='cell'; btn.setAttribute('role','gridcell'); btn.setAttribute('tabindex','0');
+      btn.dataset.food=f.id;
+      btn.innerHTML=`<svg class="icon"><use href="#${f.icon}"></use></svg>
+        <div><div class="label">${f.name}</div><div class="hint" id="hint-${f.id}"></div></div>`;
+      btn.addEventListener('click',()=> onSelect(f.id));
+      // long press for tooltip
+      let pressT=null; btn.addEventListener('touchstart',e=>{pressT=setTimeout(()=>showTooltip(btn,f),250);},{passive:true});
+      btn.addEventListener('touchend',e=>{clearTimeout(pressT); hideTooltip();},{passive:true});
+      btn.addEventListener('mouseenter',()=> showTooltip(btn,f));
+      btn.addEventListener('mouseleave',()=> hideTooltip());
+      btn.addEventListener('focus',()=> showTooltip(btn,f));
+      btn.addEventListener('blur',()=> hideTooltip());
+      grid.appendChild(btn);
+    });
+  }
+  function showTooltip(btn, f){
+    const tags=f.tags.join('・');
+    tooltip.textContent=`ヒント：${tags}`;
+    const r=btn.getBoundingClientRect(); const base=stage.getBoundingClientRect();
+    tooltip.style.left = (r.left - base.left) + 'px';
+    tooltip.style.top = (r.top - base.top - 90) + 'px';
+    tooltip.classList.add('show');
+  }
+  function hideTooltip(){ tooltip.classList.remove('show'); }
+
+  /* =============== Student SVG face generator =============== */
+  function drawFace(seed, mood){
+    // mood: normal|happy|sad affects mouth and eyebrows and highlight
+    const r=RNG(seed);
+    const svg=faceSVG; svg.innerHTML='';
+    const gender = currentStudent?.gender || (r()<0.5?'M':'F');
+    const skin = gender==='F'? '#F8D7C2' : '#F4C8AC';
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    // base head
+    const head=document.createElementNS(svg.namespaceURI,'ellipse'); head.setAttribute('cx','160'); head.setAttribute('cy','190'); head.setAttribute('rx','96'); head.setAttribute('ry','112'); head.setAttribute('fill',skin); head.setAttribute('stroke','#333'); head.setAttribute('stroke-width','2'); head.setAttribute('stroke-linecap','round'); g.appendChild(head);
+    // cheeks
+    const cheekL=document.createElementNS(svg.namespaceURI,'circle'); cheekL.setAttribute('cx','120'); cheekL.setAttribute('cy','220'); cheekL.setAttribute('r','10'); cheekL.setAttribute('fill','#F19AA0'); cheekL.setAttribute('opacity','0.45');
+    const cheekR=cheekL.cloneNode(); cheekR.setAttribute('cx','200');
+    g.appendChild(cheekL); g.appendChild(cheekR);
+    // eyes
+    const eyeCenterY=176; const eyeDx=51; const eyeW=18, eyeH=12; const irisR=5; const highlightR=2;
+    function eye(cx){
+      const e=document.createElementNS(svg.namespaceURI,'g');
+      const white=document.createElementNS(svg.namespaceURI,'ellipse'); white.setAttribute('cx',cx); white.setAttribute('cy',eyeCenterY); white.setAttribute('rx',eyeW); white.setAttribute('ry',eyeH); white.setAttribute('fill','#fff'); white.setAttribute('stroke','#333'); white.setAttribute('stroke-width','2');
+      const iris=document.createElementNS(svg.namespaceURI,'circle'); iris.setAttribute('cx',cx); iris.setAttribute('cy',eyeCenterY); iris.setAttribute('r',irisR);
+      iris.setAttribute('fill','#111');
+      const shine=document.createElementNS(svg.namespaceURI,'circle'); shine.setAttribute('cx',cx+3); shine.setAttribute('cy',eyeCenterY-3); shine.setAttribute('r', highlightR + (mood==='happy'?1:0)); shine.setAttribute('fill','#fff');
+      e.appendChild(white); e.appendChild(iris); e.appendChild(shine); return e;
+    }
+    g.appendChild(eye(160-eyeDx)); g.appendChild(eye(160+eyeDx));
+    // nose
+    const nose=document.createElementNS(svg.namespaceURI,'line'); nose.setAttribute('x1','158'); nose.setAttribute('y1','240'); nose.setAttribute('x2','168'); nose.setAttribute('y2','245'); nose.setAttribute('stroke','#333'); nose.setAttribute('stroke-width','2'); nose.setAttribute('stroke-linecap','round'); g.appendChild(nose);
+    // mouth
+    const mouth=document.createElementNS(svg.namespaceURI,'path'); const my=270; const h= mood==='happy'?6 : (mood==='sad'?-2:3); mouth.setAttribute('d',`M136 ${my} Q160 ${my+h} 184 ${my}`); mouth.setAttribute('stroke','#333'); mouth.setAttribute('stroke-width','2'); mouth.setAttribute('fill','none'); g.appendChild(mouth);
+    // eyebrows
+    function brow(x1,y1,x2,y2){ const b=document.createElementNS(svg.namespaceURI,'line'); b.setAttribute('x1',x1); b.setAttribute('y1',y1); b.setAttribute('x2',x2); b.setAttribute('y2',y2); b.setAttribute('stroke','#333'); b.setAttribute('stroke-width','2'); b.setAttribute('stroke-linecap','round'); return b; }
+    const by=eyeCenterY-10; const angle=10 + (mood==='sad'?6:0); g.appendChild(brow(110,by,132,by-Math.tan(angle*Math.PI/180)*12)); g.appendChild(brow(188,by-Math.tan(angle*Math.PI/180)*12,210,by));
+    // hair (8 types x 6 colors)
+    const hairColors=['#5C4838','#3B2F2F','#8B5E3C','#D8B38C','#2E4057','#1C1C1C'];
+    const hcol=hairColors[Math.floor(r()*hairColors.length)];
+    const type=Math.floor(r()*8);
+    const hair=document.createElementNS(svg.namespaceURI,'path'); hair.setAttribute('stroke',hcol); hair.setAttribute('fill',hcol);
+    // front bangs baseline Y=150
+    switch(type){
+      case 0: hair.setAttribute('d','M64 150 q96 -30 192 0 v40 h-192z'); break; // short
+      case 1: hair.setAttribute('d','M50 145 q110 -35 220 0 v50 h-220z'); break; // midi
+      case 2: hair.setAttribute('d','M40 145 q120 -30 240 0 v110 h-240z'); break; // long
+      case 3: hair.setAttribute('d','M70 150 q90 -30 180 0 v40 h-180z M50 200 c-6 30 16 70 34 90 M270 200 c6 30 -16 70 -34 90'); break; // twin
+      case 4: hair.setAttribute('d','M80 150 q80 -28 160 0 v40 h-160z M220 200 q10 60 -10 110'); break; // ponytail
+      case 5: hair.setAttribute('d','M60 150 q100 -26 200 0 v60 h-200z'); break; // okappa
+      case 6: hair.setAttribute('d','M84 150 q76 -26 152 0 v30 h-152z'); break; // very short
+      case 7: hair.setAttribute('d','M60 150 q100 -28 200 0 v60 h-200z m0 0 q20 40 0 80 m200 -80 q-20 40 0 80'); break; // wavy
+    }
+    g.appendChild(hair);
+    // accessories (probabilities)
+    if(r()<0.20){ // glasses
+      const gl=document.createElementNS(svg.namespaceURI,'g');
+      const rr=14; const cxL=160-eyeDx, cxR=160+eyeDx;
+      const c1=document.createElementNS(svg.namespaceURI,'circle'); c1.setAttribute('cx',cxL); c1.setAttribute('cy',eyeCenterY); c1.setAttribute('r',rr); c1.setAttribute('fill','none'); c1.setAttribute('stroke','#222'); c1.setAttribute('stroke-width','2');
+      const c2=c1.cloneNode(); c2.setAttribute('cx',cxR); const br=document.createElementNS(svg.namespaceURI,'line'); br.setAttribute('x1',cxL+rr); br.setAttribute('y1',eyeCenterY); br.setAttribute('x2',cxR-rr); br.setAttribute('y2',eyeCenterY); br.setAttribute('stroke','#222'); br.setAttribute('stroke-width','2');
+      gl.appendChild(c1); gl.appendChild(c2); gl.appendChild(br); g.appendChild(gl);
+    }
+    if(r()<0.25){ // hairpin
+      const hp=document.createElementNS(svg.namespaceURI,'rect'); hp.setAttribute('x','210'); hp.setAttribute('y','156'); hp.setAttribute('width','16'); hp.setAttribute('height','4'); hp.setAttribute('rx','2'); hp.setAttribute('fill','#f25f5c'); g.appendChild(hp);
+    }
+    if(r()<0.20){ // ribbon
+      const rb=document.createElementNS(svg.namespaceURI,'path'); rb.setAttribute('d','M140 300 l20 -10 l20 10 l-20 10 z'); rb.setAttribute('fill','#e05'); g.appendChild(rb);
+    }
+    if(r()<0.05){ // mask
+      const mk=document.createElementNS(svg.namespaceURI,'rect'); mk.setAttribute('x','120'); mk.setAttribute('y','250'); mk.setAttribute('width','80'); mk.setAttribute('height','36'); mk.setAttribute('rx','8'); mk.setAttribute('fill','#fff'); mk.setAttribute('stroke','#999'); mk.setAttribute('stroke-width','2'); g.appendChild(mk);
+    }
+    if(r()<0.15){ // freckles
+      for(let i=0;i<6;i++){ const fr=document.createElementNS(svg.namespaceURI,'circle'); fr.setAttribute('cx', 135 + i*6); fr.setAttribute('cy', 232 + ((i%2)*3)); fr.setAttribute('r','1.5'); fr.setAttribute('fill','#a66'); g.appendChild(fr); }
+    }
+    svg.appendChild(g);
+  }
+
+  /* =============== Timer drawing =============== */
+  function drawTimer(p){ // p: 1..0
+    const c=ctxTimer; c.clearRect(0,0,44,44);
+    c.save(); c.translate(22,22);
+    c.beginPath(); c.arc(0,0,20,0,Math.PI*2); c.strokeStyle='#ddd'; c.lineWidth=4; c.stroke();
+    c.beginPath(); c.arc(0,0,20,-Math.PI/2, -Math.PI/2 + (Math.PI*2)*p); c.strokeStyle='#0C63E4'; c.lineWidth=4; c.stroke();
+    c.restore();
+  }
+
+  /* =============== Game runtime =============== */
+  let students=[]; let order=[]; let currentIndex=0; let currentStudent=null;
+  let combo=0, maxCombo=0; let totalDelta=0; let stats={like:0,soft:0,neutral:0,dislike:0,hard:0};
+  let selecting=false; let timerRemain=CONFIG.DEFAULT_TIMER; let timerOver=false; let lastFrame=0;
+
+  function resetGame(){
+    students=genStudents();
+    order=[...Array(30).keys()]; // 0..29
+    // Shuffle with seed
+    for(let i=order.length-1;i>0;i--){ const j=(rnd()* (i+1))|0; [order[i],order[j]]=[order[j],order[i]]; }
+    currentIndex=0; combo=0; maxCombo=0; totalDelta=0; stats={like:0,soft:0,neutral:0,dislike:0,hard:0};
+  }
+
+  function startRun(){
+    hideAllOverlays(); ensureAudio(); ttsEnabled = settings.tts && !CONFIG.DEBUG; setVolumes();
+    if(AC && AC.state!=='suspended'){ bgmPlaying=true; }
+    currentState=State.TUTORIAL; ovHow.classList.add('show');
+  }
+
+  function nextStudent(){
+    if(currentIndex>=order.length){ return showResult(); }
+    const s=students[order[currentIndex]]; currentStudent=s; progressEl.textContent=`${currentIndex+1} / ${students.length}`;
+    // Enter animation would move sprite; here we just refresh face and bubble
+    drawFace(s.svgSeed, 'normal');
+    bubble.classList.remove('show'); setTimeout(()=>{ bubble.classList.add('show'); sfxBubble(); }, 10);
+    studentNameEl.textContent=`${s.name}（${s.gender==='M'?'男':'女'}）`;
+    speechEl.textContent=s.talk;
+    if(ttsEnabled) speak(`${s.name}。${s.talk}`);
+    // Fill cell hints with brief association words
+    CONFIG.FOODS.forEach(f=>{ const el=document.getElementById('hint-'+f.id); el.textContent=f.tags.slice(0,2).join('・'); });
+
+    selecting=true; timerOver=false; timerRemain = (settings.timer==='OFF'||CONFIG.DEBUG)? Infinity : Number(settings.timer);
+    timerText.textContent = Number.isFinite(timerRemain)? Math.ceil(timerRemain) : '—';
+    drawTimer(1);
+  }
+
+  function onSelect(foodId){ if(!selecting) return; allowInput=false; selecting=false; sfxDecision();
+    const res=judge(currentStudent, foodId); const d=res.delta; totalDelta+=d;
+    let type=res.type; stats[type==='hard'?'hard':type]++;
+    // combo
+    if(type==='like' || type==='soft'){ combo=Math.min(combo+1, 999); const bonus=Math.min(combo*3, 15); totalDelta+= (type==='like'? Math.min(15, bonus):0); } else { combo=0; }
+    maxCombo=Math.max(maxCombo, combo);
+    showFeedback(d, type);
+    setTimeout(()=>{ currentIndex++; nextStudent(); allowInput=true; }, 600); // includes expression switch 150ms + float 0.6s
+  }
+
+  function showFeedback(delta, type){
+    // Face expression
+    drawFace(currentStudent.svgSeed, delta>=0? 'happy':'sad');
+    // Floating text
+    const div=document.createElement('div'); div.style.position='absolute'; div.style.left='880px'; div.style.top='220px'; div.style.fontSize='18px'; div.style.fontWeight='700'; div.style.pointerEvents='none'; div.style.transition='transform .6s ease-out, opacity .2s .6s'; div.textContent=(delta>=0?'+':'')+delta; div.style.color= delta>=0? '#0c7c3a':'#b02a37'; stage.appendChild(div); setTimeout(()=>{div.style.transform='translateY(-40px)'; div.style.opacity='0';},10); setTimeout(()=>div.remove(),800);
+    // shake on wrong
+    if(delta<0){ sfxWrong(); faceSVG.animate([{transform:'translateX(0px)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0px)'}],{duration:400,iterations:1}); }
+    if(delta>0){ sfxCorrect(); }
+    comboEl.textContent=`コンボ ${combo}`;
+  }
+
+  function showResult(){ currentState=State.RESULT; ovResult.classList.add('show'); bgmPlaying=true; drawChalkResult(); summarize(); saveStats(); }
+
+  function summarize(){
+    const avg = Math.round((students.reduce((a,s)=>a+CONFIG.BASE_AFFINITY,0)+totalDelta)/students.length);
+    const mean = Math.max(0, Math.min(100, avg));
+    const rank = mean>=75?'S': mean>=60?'A': mean>=45?'B': mean>=30?'C':'D';
+    const comment = {S:'すごい！またあなたに配ってほしい',A:'ほとんど好きだった。気が利くね',B:'ふつう。次は好きのほうを期待',C:'今日はちょっと残念……',D:'ごめん、これは厳しい'}[rank];
+    const text=`<b>合計</b> ${totalDelta>=0?'+':''}${totalDelta}　<b>平均</b> ${mean}　<b>ランク</b> ${rank}<br>
+    <b>内訳</b> like:${stats.like} soft:${stats.soft} neutral:${stats.neutral} dislike:${stats.dislike} hard:${stats.hard}　<b>最長コンボ</b> ${maxCombo}<br>
+    <b>コメント</b> 「${comment}」`;
+    document.getElementById('resultText').innerHTML=text;
+  }
+
+  function saveStats(){
+    const rec=JSON.parse(localStorage.getItem('kyushoku_stats')||'[]');
+    const avg = Math.round((students.reduce((a,s)=>a+CONFIG.BASE_AFFINITY,0)+totalDelta)/students.length);
+    rec.unshift({t:Date.now(), avg, rank: (avg>=75?'S': avg>=60?'A': avg>=45?'B': avg>=30?'C':'D')});
+    while(rec.length>10) rec.pop();
+    localStorage.setItem('kyushoku_stats', JSON.stringify(rec));
+  }
+
+  /* =============== Chalk result drawing =============== */
+  function drawChalkResult(){
+    const ctx=chalkCtx; ctx.clearRect(0,0,1280,720);
+    // Blackboard bg band already there; write lines on board area at y=120..300
+    const lines=[`合計: ${totalDelta>=0?'+':''}${totalDelta}`, `平均: ${Math.max(0, Math.min(100, Math.round((students.length*CONFIG.BASE_AFFINITY+totalDelta)/students.length)))}`, `最長コンボ: ${maxCombo}`];
+    ctx.strokeStyle=CONFIG.COLORS.chalk; ctx.lineWidth=4; ctx.lineCap='round';
+    let i=0; function drawNext(){ if(i>=lines.length) return; let x=60, y=140+i*40; const text=lines[i++]; let j=0; const timer=setInterval(()=>{ ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x+6, y+ (Math.random()*2-1)); ctx.stroke(); x+=12; if(x> 60+text.length*20){ clearInterval(timer); setTimeout(drawNext, 150); }}, 16); }
+    drawNext();
+  }
+
+  /* =============== Input handling =============== */
+  let focusIndex=0;
+  function focusCell(idx){ const cells=[...grid.children]; const n=cells.length; focusIndex=(idx+n)%n; cells[focusIndex].focus(); }
+  document.addEventListener('keydown',e=>{
+    if(!allowInput) return;
+    if(e.key==='Escape'){ if(currentState===State.SERVE){ pause(); } e.preventDefault(); return; }
+    if(currentState!==State.SERVE) return;
+    const row=3;
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){ e.preventDefault(); const n=grid.children.length; const col=3; const r=Math.floor(focusIndex/col), c=focusIndex%col; let nr=r, nc=c; if(e.key==='ArrowLeft') nc=(c+col-1)%col; if(e.key==='ArrowRight') nc=(c+1)%col; if(e.key==='ArrowUp') nr=(r+row-1)%row; if(e.key==='ArrowDown') nr=(r+1)%row; focusCell(nr*col+nc); }
+    if(e.key==='Enter'){ e.preventDefault(); const btn=grid.children[focusIndex]; btn && btn.click(); }
+  });
+
+  function pause(){ currentState=State.PAUSE; ovPause.classList.add('show'); }
+  function resume(){ currentState=State.SERVE; ovPause.classList.remove('show'); }
+
+  /* =============== Overlays helpers =============== */
+  function hideAllOverlays(){ [ovTitle,ovHow,ovPause,ovOpt,ovResult].forEach(o=>o.classList.remove('show')); }
+
+  /* =============== Settings bind =============== */
+  function openSettings(){ ovOpt.classList.add('show'); }
+  function applySettings(){ settings.bgm=bgmVol.value/100; settings.sfx=sfxVol.value/100; settings.tts=(ttsOn.value==='ON'); settings.timer=selTimer.value; settings.font=parseFloat(fontPct.value)||1; settings.contrast=(colorMode.value==='高コントラスト'); setVolumes(); applyScale(); }
+  [bgmVol,sfxVol,ttsOn,selTimer,fontPct,colorMode].forEach(el=>el.addEventListener('input',applySettings));
+
+  /* =============== Buttons =============== */
+  startBtn.addEventListener('click',()=>{ ensureAudio(); startRun(); });
+  howBtn.addEventListener('click',()=>{ hideAllOverlays(); ovHow.classList.add('show'); });
+  howOk.addEventListener('click',()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
+  optBtn.addEventListener('click',()=>{ openSettings(); });
+  optBtn2.addEventListener('click',()=>{ openSettings(); });
+  optClose.addEventListener('click',()=>{ ovOpt.classList.remove('show'); });
+  resumeBtn.addEventListener('click',()=>{ resume(); });
+  toTitleBtn.addEventListener('click',()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
+  resTitleBtn.addEventListener('click',()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
+  replayBtn.addEventListener('click',()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
+
+  /* =============== Game Loop =============== */
+  function loop(t){ requestAnimationFrame(loop); if(!lastFrame) lastFrame=t; const dt=(t-lastFrame)/1000; lastFrame=t;
+    if(AC){ bgmTick(); }
+    if(currentState===State.SERVE && selecting){ if(Number.isFinite(timerRemain)){ timerRemain=Math.max(0, timerRemain-dt); drawTimer(timerRemain/settings.timer); timerText.textContent = Math.ceil(timerRemain); if(timerRemain<=0 && !timerOver){ timerOver=true; /* do not auto decide: wait for player */ } } }
+  }
+  requestAnimationFrame(loop);
+
+  /* =============== Accessibility: initial bubble & focus =============== */
+  applyScale(); buildGrid();
+  // Title animation placeholder: 3s fade-in already implied by overlay
+
+  // DEBUG hooks
+  if(CONFIG.DEBUG){ settings.timer='OFF'; settings.tts=false; console.log('[DEBUG] Timer OFF, TTS mute, all likes set to カレーライス'); }
+
+})();
+</script>
 </body>
 </html>
