@@ -352,7 +352,8 @@
     fit.style.setProperty('paddingRight', `${(vw-sw*scale)/2}px`);
     fit.style.setProperty('paddingTop', `${(vh-sh*scale)/2}px`);
     fit.style.setProperty('paddingBottom', `${(vh-sh*scale)/2}px`);
-    document.documentElement.style.setProperty('--fs', settings.font);
+    const fontScale = settings.font / scale;
+    document.documentElement.style.setProperty('--fs', fontScale);
     document.body.classList.toggle('contrast', settings.contrast);
   }
   window.addEventListener('resize', applyScale);
