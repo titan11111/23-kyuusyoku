@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: calc(1vw + 1vh);
+}
+
 body {
   font-family: 'MS PGothic', 'Hiragino Kaku Gothic Pro', sans-serif;
   background: #fff;
@@ -18,7 +22,7 @@ body {
   min-height: 100vh;
   background: white;
   margin: 0 auto;
-  padding: 10px;
+  padding: 2vh;
 }
 
 .game-instructions {
@@ -26,14 +30,14 @@ body {
   text-align: center;
   background: #FFF3CD;
   color: #555;
-  padding: 10px;
+  padding: 2vh;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 2vh;
 }
 
 /* 画面管理 */
 .screen {
-  padding: 20px;
+  padding: 4vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -53,13 +57,13 @@ body {
 
 #title-screen h1 {
   font-size: 2.5em;
-  margin-bottom: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 3vh;
+  text-shadow: 0.2vh 0.2vh 0.4vh rgba(0, 0, 0, 0.1);
 }
 
 #title-screen p {
   font-size: 1.2em;
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
   line-height: 1.6;
 }
 
@@ -67,23 +71,23 @@ body {
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
   color: white;
   border: none;
-  padding: 15px 30px;
+  padding: 2vh 4vw;
   font-size: 1.3em;
-  border-radius: 50px;
+  border-radius: 5vh;
   cursor: pointer;
-  margin: 10px;
+  margin: 2vh;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 0.5vh 1.5vh rgba(255, 107, 107, 0.3);
 }
 
 .big-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  transform: translateY(-0.5vh);
+  box-shadow: 0 0.8vh 2vh rgba(255, 107, 107, 0.4);
 }
 
 /* ゲーム画面 */
 #game-screen {
-  padding: 15px;
+  padding: 2vh;
   align-items: stretch;
   justify-content: flex-start;
   display: flex;
@@ -94,13 +98,13 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 3vh;
   flex-wrap: wrap;
 }
 
 .score-info {
   display: flex;
-  gap: 20px;
+  gap: 3vh;
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
@@ -109,28 +113,45 @@ body {
 .score-info span {
   background: #4CAF50;
   color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
+  padding: 1vh 2vw;
+  border-radius: 3vh;
   font-weight: bold;
 }
 
 .game-main {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  gap: 2vh;
+}
+
+@media (max-width: 600px) {
+  .game-main {
+    flex-direction: column;
+  }
+  .student-card,
+  .menu-selection {
+    width: 100%;
+  }
+}
+
+@media (min-width: 601px) {
+  .student-card,
+  .menu-selection {
+    width: 50%;
+  }
 }
 
 .student-card {
   background: linear-gradient(135deg, #E8F5E8 0%, #F0FFF0 100%);
-  border: 3px solid #4CAF50;
-  border-radius: 20px;
-  padding: 20px;
+  border: 0.4vh solid #4CAF50;
+  border-radius: 3vh;
+  padding: 3vh;
   text-align: center;
-  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0.7vh 2vh rgba(76, 175, 80, 0.2);
 }
 
 .student-face {
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
 }
 .student-face img {
   width: 4em;
@@ -141,26 +162,26 @@ body {
   font-size: 1.5em;
   font-weight: bold;
   color: #2E7D32;
-  margin-bottom: 10px;
+  margin-bottom: 1.5vh;
 }
 
 .student-comment {
   font-size: 1.1em;
   color: #666;
   font-style: italic;
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
   line-height: 1.4;
 }
 
 .student-preferences {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1vh;
 }
 
 .likes, .dislikes {
-  padding: 8px 12px;
-  border-radius: 15px;
+  padding: 1vh 2vw;
+  border-radius: 2vh;
   font-weight: bold;
 }
 
@@ -182,7 +203,7 @@ body {
 .menu-selection h3 {
   text-align: center;
   color: #FF6B6B;
-  margin-bottom: 15px;
+  margin-bottom: 2vh;
   font-size: 1.3em;
 }
 
@@ -190,14 +211,14 @@ body {
 .menu-buttons-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+  gap: 0.3vh;
 }
 
 .menu-button {
   background: linear-gradient(135deg, #FFF8DC 0%, #FFFACD 100%);
-  border: 2px solid #FFD700;
-  border-radius: 15px;
-  padding: 12px 8px;
+  border: 0.3vh solid #FFD700;
+  border-radius: 2vh;
+  padding: 2vh 1vw;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -207,14 +228,14 @@ body {
 }
 
 .menu-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+  transform: translateY(-0.3vh);
+  box-shadow: 0 0.7vh 2vh rgba(255, 215, 0, 0.3);
   background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
 }
 
 .reaction-area {
   text-align: center;
-  min-height: 60px;
+  min-height: 10vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -223,8 +244,8 @@ body {
 .reaction-message {
   font-size: 1.3em;
   font-weight: bold;
-  padding: 15px 25px;
-  border-radius: 25px;
+  padding: 2vh 3vw;
+  border-radius: 4vh;
   display: inline-block;
   transition: all 0.5s ease;
 }
@@ -232,34 +253,34 @@ body {
   width: 1.5em;
   height: 1.5em;
   vertical-align: middle;
-  margin-left: 8px;
+  margin-left: 1vh;
 }
 
 .reaction-message.good {
   background: #C8E6C9;
   color: #2E7D32;
-  border: 2px solid #4CAF50;
+  border: 0.3vh solid #4CAF50;
 }
 .reaction-message.medium {
   background: #FFECB3;
   color: #FF8F00;
-  border: 2px solid #FFC107;
+  border: 0.3vh solid #FFC107;
   animation: pop 0.5s ease;
 }
 .reaction-message.neutral {
   background: #E0E0E0;
   color: #424242;
-  border: 2px solid #9E9E9E;
+  border: 0.3vh solid #9E9E9E;
 }
 .reaction-message.bad {
   background: #FFCDD2;
   color: #C62828;
-  border: 2px solid #F44336;
+  border: 0.3vh solid #F44336;
 }
 .reaction-message.worst {
   background: #F8BBD0;
   color: #880E4F;
-  border: 2px solid #AD1457;
+  border: 0.3vh solid #AD1457;
 }
 
 @keyframes pop {
@@ -275,8 +296,8 @@ body {
   transform: translate(-50%, -50%);
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
-  padding: 15px 20px;
-  border-radius: 10px;
+  padding: 2vh 3vw;
+  border-radius: 1.5vh;
   z-index: 1000;
   animation: fadeInOut 2s ease forwards;
 }
@@ -297,15 +318,15 @@ body {
 #result-screen h2 {
   font-size: 2em;
   color: #1976D2;
-  margin-bottom: 30px;
+  margin-bottom: 4vh;
 }
 
 .result-stats {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 30px;
+  margin-bottom: 4vh;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 3vh;
 }
 
 .stat {
@@ -313,16 +334,16 @@ body {
   flex-direction: column;
   align-items: center;
   background: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  min-width: 120px;
+  padding: 3vh;
+  border-radius: 2vh;
+  box-shadow: 0 0.7vh 2vh rgba(0, 0, 0, 0.1);
+  min-width: 30vw;
 }
 
 .stat-label {
   font-size: 1em;
   color: #666;
-  margin-bottom: 10px;
+  margin-bottom: 1.5vh;
 }
 
 .stat-value {
@@ -333,47 +354,10 @@ body {
 
 .result-message {
   font-size: 1.3em;
-  margin-bottom: 30px;
-  padding: 20px;
+  margin-bottom: 4vh;
+  padding: 3vh;
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 15px;
+  border-radius: 2vh;
   line-height: 1.6;
 }
 
-/* スマホ対応 */
-@media (max-width: 768px) {
-  .game-container { margin: 5px; border-radius: 15px; }
-  .game-header { flex-direction: column; gap: 15px; margin-bottom: 10px; }
-  .score-info { flex-direction: row; align-items: center; gap: 8px; flex-wrap: nowrap; justify-content: center; }
-  .score-info span { padding: 6px 12px; font-size: 0.9em; text-align: center; }
-
-  .game-main { flex-direction: column; gap: 15px; margin-bottom: 10px; }
-  .student-area, .menu-selection { min-width: auto; max-width: 100%; }
-  .student-card { padding: 15px; }
-  .student-face img { width: 3em; height: 3em; }
-  .student-name { font-size: 1.4em; margin-bottom: 8px; }
-  .student-comment { font-size: 1.1em; line-height: 1.6; margin-bottom: 12px; }
-
-  .menu-buttons-grid { grid-template-columns: repeat(3, 1fr); gap: 2px; }
-  .menu-button { padding: 5px 6px; font-size: 0.95em; }
-
-  .reaction-area { min-height: 50px; }
-  .result-stats { flex-direction: column; align-items: center; }
-  #title-screen h1 { font-size: 2em; }
-  #title-screen p { font-size: 1em; }
-}
-
-@media (max-width: 480px) {
-  .screen { padding: 15px; }
-  .student-face img { width: 2.5em; height: 2.5em; }
-  .student-name { font-size: 1.3em; }
-  .student-comment { font-size: 1em; line-height: 1.5; }
-  .menu-buttons-grid { grid-template-columns: repeat(3, 1fr); }
-  .menu-button { font-size: 1em; }
-  .big-button { padding: 12px 25px; font-size: 1.1em; }
-  .reaction-area { min-height: 40px; }
-}
-
-@media (max-width: 360px) {
-  .menu-buttons-grid { grid-template-columns: repeat(3, 1fr); }
-}
