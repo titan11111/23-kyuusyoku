@@ -338,6 +338,17 @@
   const resTitleBtn=document.getElementById('resTitleBtn');
   const replayBtn=document.getElementById('replayBtn');
 
+  // Event helper for click/touch
+  function bindTap(el, handler){
+    el.addEventListener("click", handler);
+    el.addEventListener("pointerup", e=>{
+      if(e.pointerType!=="mouse"){
+        e.preventDefault();
+        handler(e);
+      }
+    });
+  }
+
   // Settings controls
   const bgmVol=document.getElementById('bgmVol');
   const sfxVol=document.getElementById('sfxVol');
@@ -365,6 +376,7 @@
     document.body.classList.toggle('contrast', settings.contrast);
   }
   window.addEventListener('resize', applyScale);
+  window.addEventListener('orientationchange', applyScale);
 
   /* =============== RNG (LCG) =============== */
   function RNG(seed){let s=seed>>>0; return ()=> (s=(s*1664525+1013904223)>>>0, (s>>>0)/4294967296);}
@@ -559,10 +571,18 @@
       btn.dataset.food=f.id;
       btn.innerHTML=`<svg class="icon"><use href="#${f.icon}"></use></svg>
         <div><div class="label">${f.name}</div><div class="hint" id="hint-${f.id}"></div></div>`;
-      btn.addEventListener('click',()=> onSelect(f.id));
-      // long press for tooltip
-      let pressT=null; btn.addEventListener('touchstart',e=>{pressT=setTimeout(()=>showTooltip(btn,f),250);},{passive:true});
-      btn.addEventListener('touchend',e=>{clearTimeout(pressT); hideTooltip();},{passive:true});
+      bindTap(btn, ()=> onSelect(f.id));
+      // long press for tooltip (touch/stylus)
+      let pressT=null;
+      btn.addEventListener('pointerdown', e=>{
+        if(e.pointerType!=='mouse'){ pressT=setTimeout(()=>showTooltip(btn,f),250); }
+      });
+      btn.addEventListener('pointerup', e=>{
+        if(e.pointerType!=='mouse'){ clearTimeout(pressT); hideTooltip(); }
+      });
+      btn.addEventListener('pointerleave', e=>{
+        if(e.pointerType!=='mouse'){ clearTimeout(pressT); hideTooltip(); }
+      });
       btn.addEventListener('mouseenter',()=> showTooltip(btn,f));
       btn.addEventListener('mouseleave',()=> hideTooltip());
       btn.addEventListener('focus',()=> showTooltip(btn,f));
@@ -773,16 +793,16 @@
   [bgmVol,sfxVol,ttsOn,selTimer,fontPct,colorMode].forEach(el=>el.addEventListener('input',applySettings));
 
   /* =============== Buttons =============== */
-  startBtn.addEventListener('click',()=>{ ensureAudio(); startRun(); });
-  howBtn.addEventListener('click',()=>{ hideAllOverlays(); ovHow.classList.add('show'); });
-  howOk.addEventListener('click',()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
-  optBtn.addEventListener('click',()=>{ openSettings(); });
-  optBtn2.addEventListener('click',()=>{ openSettings(); });
-  optClose.addEventListener('click',()=>{ ovOpt.classList.remove('show'); });
-  resumeBtn.addEventListener('click',()=>{ resume(); });
-  toTitleBtn.addEventListener('click',()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
-  resTitleBtn.addEventListener('click',()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
-  replayBtn.addEventListener('click',()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
+  bindTap(startBtn,()=>{ ensureAudio(); startRun(); });
+  bindTap(howBtn,()=>{ hideAllOverlays(); ovHow.classList.add('show'); });
+  bindTap(howOk,()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
+  bindTap(optBtn,()=>{ openSettings(); });
+  bindTap(optBtn2,()=>{ openSettings(); });
+  bindTap(optClose,()=>{ ovOpt.classList.remove('show'); });
+  bindTap(resumeBtn,()=>{ resume(); });
+  bindTap(toTitleBtn,()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
+  bindTap(resTitleBtn,()=>{ hideAllOverlays(); ovTitle.classList.add('show'); currentState=State.TITLE; });
+  bindTap(replayBtn,()=>{ hideAllOverlays(); currentState=State.SERVE; resetGame(); buildGrid(); focusCell(0); nextStudent(); });
 
   /* =============== Game Loop =============== */
   function loop(t){ requestAnimationFrame(loop); if(!lastFrame) lastFrame=t; const dt=(t-lastFrame)/1000; lastFrame=t;
